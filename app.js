@@ -101,6 +101,9 @@ var db = null;
 function norm(s){
   return (s||"").toString().normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
 }
+function normBusca(s){
+  return norm(s).replace(/[.,]/g, " ").replace(/\s+/g, " ").trim();
+}
 function esc(s){
   return (s==null?"":String(s)).replace(/[&<>"']/g, function(c){
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
@@ -349,44 +352,70 @@ function renderCorpo(corpo, semitones, scale, cols){
    buscar "Em" casaria com quase tudo. */
 function indexarCanto(v){
   v._linhas = (v.corpo||[]).filter(function(l){ return l.trim() && !isChordLine(l); });
-  v._linhasNorm = v._linhas.map(norm);
-  v._base = norm((v.numeroStr||"")+" "+(v.titulo||"")+" "+(v.categoria||""));
+  v._linhasNorm = v._linhas.map(normBusca);
+  v._base = normBusca((v.numeroStr||"")+" "+(v.titulo||"")+" "+(v.categoria||""));
   return v;
 }
 function trechoDeBusca(s, q){
+  var qb = normBusca(q);
+  if(!qb) return null;
   var linhas = s._linhasNorm || [];
   for(var i=0;i<linhas.length;i++){
-    if(linhas[i].indexOf(q) !== -1) return s._linhas[i];
+    if(linhas[i].indexOf(qb) !== -1) return s._linhas[i];
   }
   return null;
 }
 function combinaBusca(s, q){
-  return (s._base||"").indexOf(q) !== -1 || trechoDeBusca(s, q) !== null;
+  var qb = normBusca(q);
+  if(!qb) return true;
+  return (s._base||"").indexOf(qb) !== -1 || trechoDeBusca(s, qb) !== null;
 }
-/* Recorta a linha em volta do trecho encontrado e destaca o termo. O destaque
-   só é aplicado quando normalizar não mudou o comprimento da linha (caso normal
-   em português), para nunca marcar o pedaço errado. */
+/* Recorta a linha em volta do trecho encontrado e destaca o termo. */
 function trechoHtml(linha, q){
+  var qb = normBusca(q);
+  if(!qb) return esc(linha.trim());
+
   var n = norm(linha);
-  var i = n.indexOf(q);
+  var i = n.indexOf(norm(q));
+  if(i === -1){
+    var nb = normBusca(linha);
+    i = nb.indexOf(qb);
+  }
   if(i === -1) return esc(linha.trim());
+
   var ini = Math.max(0, i - 28);
-  var fim = Math.min(linha.length, i + q.length + 46);
+  var fim = Math.min(linha.length, i + qb.length + 46);
   var pedaco = linha.slice(ini, fim);
   var prefixo = ini > 0 ? "…" : "";
   var sufixo = fim < linha.length ? "…" : "";
-  if(n.length !== linha.length) return prefixo + esc(pedaco.trim()) + sufixo;
-  var rel = i - ini;
-  return prefixo +
-    esc(pedaco.slice(0, rel)) +
-    '<mark>' + esc(pedaco.slice(rel, rel + q.length)) + '</mark>' +
-    esc(pedaco.slice(rel + q.length)) +
-    sufixo;
+
+  // Tenta destacar as palavras correspondentes com <mark>
+  var palavras = qb.split(" ").filter(Boolean).map(function(p){
+    return p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  });
+  if(palavras.length){
+    try {
+      var re = new RegExp("(" + palavras.join("[\\s.,;:!?-]+") + ")", "i");
+      var match = pedaco.match(re);
+      if(match && match.index != null){
+        var mIni = match.index;
+        var mFim = mIni + match[0].length;
+        return prefixo +
+          esc(pedaco.slice(0, mIni)) +
+          '<mark>' + esc(pedaco.slice(mIni, mFim)) + '</mark>' +
+          esc(pedaco.slice(mFim)) +
+          sufixo;
+      }
+    } catch(e){}
+  }
+
+  return prefixo + esc(pedaco.trim()) + sufixo;
 }
 function trechoSpan(s, q){
-  if(!q || (s._base||"").indexOf(q) !== -1) return "";   // já casou pelo título/número
-  var linha = trechoDeBusca(s, q);
-  return linha ? '<span class="trecho">'+trechoHtml(linha, q)+'</span>' : "";
+  var qb = normBusca(q);
+  if(!qb || (s._base||"").indexOf(qb) !== -1) return "";   // já casou pelo título/número
+  var linha = trechoDeBusca(s, qb);
+  return linha ? '<span class="trecho">'+trechoHtml(linha, qb)+'</span>' : "";
 }
 
 /* ---------------- data access helpers ---------------- */
@@ -403,7 +432,7 @@ function sortedByNumero(list){
 function renderBiblioteca(){
   var el = document.getElementById("lib-list");
   if(!state.dbReady){ el.innerHTML = '<div class="loading">Carregando cantos…</div>'; return; }
-  var q = norm(state.libSearch);
+  var q = normBusca(state.libSearch);
   var filtered = state.songs.filter(function(s){
     if(!q) return true;
     return combinaBusca(s, q);
@@ -903,7 +932,7 @@ function openSongPicker(momentoId){
 function renderPickerList(){
   var ctx = state.pickerCtx;
   if(!ctx || ctx.mode !== "add-to-momento") return;
-  var q = norm(document.getElementById("picker-search").value);
+  var q = normBusca(document.getElementById("picker-search").value);
   var allCats = document.getElementById("picker-all-cats").checked;
   var list = state.songs.filter(function(s){
     if(!allCats && ctx.onlyCat && s.categoria !== ctx.onlyCat) return false;
