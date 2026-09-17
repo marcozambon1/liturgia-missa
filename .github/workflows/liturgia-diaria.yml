@@ -4,7 +4,12 @@ on:
   schedule:
     # Executa todos os dias às 03:00 (BRT) / 06:00 (UTC)
     - cron: '0 6 * * *'
-  workflow_dispatch: # Permite rodar manualmente pelo GitHub
+  workflow_dispatch:
+    inputs:
+      parametro:
+        description: 'Período a sincronizar (dias como "30", ano como "2027" ou data como "2027-04-18")'
+        required: false
+        default: '30'
 
 jobs:
   sincronizar:
@@ -18,6 +23,11 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Atualizar Liturgia dos próximos 30 dias
+      - name: Atualizar Liturgia
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
-          python atualizar_liturgia.py 30
+          PARAM="${{ github.event.inputs.parametro }}"
+          if [ -z "$PARAM" ]; then PARAM="30"; fi
+          python atualizar_liturgia.py "$PARAM"
