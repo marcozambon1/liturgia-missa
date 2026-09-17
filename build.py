@@ -40,6 +40,17 @@ def main():
 
     html = html.replace('<link rel="stylesheet" href="styles.css">',
                         "<style>\n%s\n</style>" % css)
+    
+    if os.path.exists(os.path.join(RAIZ, "config.js")):
+        cfg_js = ler("config.js")
+        html = html.replace('<script src="config.js"></script>',
+                            "<script>\n%s\n</script>" % cfg_js)
+    
+    if os.path.exists(os.path.join(RAIZ, "supabase-adapter.js")):
+        adp_js = ler("supabase-adapter.js")
+        html = html.replace('<script src="supabase-adapter.js"></script>',
+                            "<script>\n%s\n</script>" % adp_js)
+
     html = html.replace('<script src="app.js"></script>',
                         "<script>\n%s\n</script>" % js)
 

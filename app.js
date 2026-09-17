@@ -2207,11 +2207,9 @@ function boot(){
   aplicarFonte("impressao");
   ligarControleFonte("detalhe");
   ligarControleFonte("impressao");
-  var useDb = (typeof window!=="undefined" && window.claude && typeof window.claude.use==="function")
-    ? window.claude.use("db") : Promise.resolve(null);
-  useDb.then(function(dbNs){
+  function conectarBanco(dbNs){
     if(!dbNs){
-      document.getElementById("lib-list").innerHTML = '<div class="empty">Não foi possível conectar ao banco de dados deste artefato.</div>';
+      document.getElementById("lib-list").innerHTML = '<div class="empty">Não foi possível conectar ao banco de dados. Configure suas credenciais do Supabase em <code>config.js</code>.</div>';
       return;
     }
     db = dbNs;
@@ -2264,7 +2262,22 @@ function boot(){
       if(state.currentTab==="adicionar") renderPedidos();
       if(state.currentTab==="missa") renderMissaPanel();
     });
-  }).catch(function(){
+  }
+
+  window.reiniciarBoot = function(customDb){
+    conectarBanco(customDb);
+  };
+
+  var useDb;
+  if(typeof window!=="undefined" && window.supabaseDb){
+    useDb = Promise.resolve(window.supabaseDb);
+  } else if(typeof window!=="undefined" && window.claude && typeof window.claude.use==="function"){
+    useDb = window.claude.use("db");
+  } else {
+    useDb = Promise.resolve(null);
+  }
+
+  useDb.then(conectarBanco).catch(function(){
     document.getElementById("lib-list").innerHTML = '<div class="empty">Recurso de banco de dados indisponível nesta visualização.</div>';
   });
   renderBiblioteca();

@@ -33,50 +33,36 @@ dos recursos — o servidor local evita esse tipo de surpresa.
 A página vai carregar e mostrar o aviso de banco indisponível. Isso é
 esperado: veja a seção seguinte.
 
-## O ponto que precisa de trabalho para hospedar
+## Banco de Dados com Supabase
 
-O aplicativo não tem backend próprio. Ele conversa com o banco de dados que
-o runtime do Claude oferece à página publicada, obtido em `app.js`:
+O aplicativo conta com suporte integrado ao **Supabase** (PostgreSQL com sincronização em tempo real via Realtime), funcionando perfeitamente no plano gratuito (**Free Tier**):
 
-    // app.js, dentro de boot(), por volta da linha 2211
-    window.claude.use("db")
+### Como configurar o Supabase:
 
-Fora do Claude essa chamada não existe, `db` fica `null` e a biblioteca
-aparece vazia com a mensagem "Não foi possível conectar ao banco de dados".
-**Hospedar a pasta num servidor, sozinho, não faz o app funcionar.** É
-preciso fornecer um objeto `db` equivalente.
+1. **Crie um projeto gratuito** em [supabase.com](https://supabase.com).
+2. **Execute o Schema SQL**:
+   - No painel do Supabase, abra o menu **SQL Editor**.
+   - Abra o arquivo `schema.sql` deste repositório, copie o conteúdo, cole no editor e clique em **Run**.
+   - Isso criará as tabelas necessárias (`songs`, `missas`, `rascunhos`, `salmos`, `aclamacoes`, `pedidos`, `config`), habilitará as políticas de segurança (RLS) e a publicação Realtime.
+3. **Faça a carga inicial dos dados (Seed)**:
+   - Execute o script Python para enviar os 432 cantos e salmos da pasta `dados/` diretamente para o seu banco:
+     ```bash
+     python seed.py
+     ```
+   - O script solicitará a **Project URL** e a **Anon Key** (ou você pode passá-las como argumentos: `python seed.py <URL> <KEY>`).
+4. **Configure o Frontend**:
+   - Preencha suas credenciais em `config.js` (ou insira na tela de boas-vindas do próprio navegador ao abrir o app):
+     ```javascript
+     window.SUPABASE_CONFIG = {
+       url: "https://seu-projeto.supabase.co",
+       anonKey: "sua-chave-anon-publica"
+     };
+     ```
 
-A boa notícia é que a interface usada é a do Firestore, e apenas um
-subconjunto dela:
+Pronto! O aplicativo funcionará com sincronização instantânea em tempo real entre todos os membros do grupo.
 
-    db.collection(nome)                  -> referência de coleção
-    db.collection(nome).doc(id)          -> referência de documento
-      .get()                             leitura avulsa
-      .set(obj)                          grava o documento inteiro
-      .update(obj)                       mescla campos (exige documento existente)
-      .delete()
-    db.collection(nome).add(obj)         cria com id gerado
-    db.collection(nome).onSnapshot(cb)   assina a coleção, em tempo real
-
-As coleções usadas são `songs`, `missas`, `rascunhos`, `salmos`,
-`aclamacoes`, `pedidos` e `config`.
-
-Caminhos possíveis, do mais curto ao mais longo:
-
-1. **Firebase / Firestore.** A API bate quase 1:1 com o que o código já
-   chama — na prática é trocar a linha do `window.claude.use("db")` pela
-   inicialização do Firestore e manter todo o resto. Tem plano gratuito e
-   resolve autenticação e regras de acesso por usuário, que é justamente o
-   que hoje impede duas pessoas de editarem juntas.
-2. **Supabase.** Banco Postgres com API pronta; exige escrever uma camada
-   fina que traduza as chamadas acima para as do cliente do Supabase.
-3. **Backend próprio** (Node, .NET, o que for) com um banco qualquer e a
-   mesma camada de tradução. Mais controle, mais trabalho, e passa a exigir
-   um servidor de verdade em vez de hospedagem estática.
-
-Enquanto isso não existir, dá para deixar o app utilizável em modo
-demonstração implementando esse mesmo objeto sobre `localStorage`: funciona
-offline e por navegador, sem compartilhar nada entre pessoas.
+### Modo Demonstração (Offline)
+Caso queira testar a interface imediatamente sem configurar o Supabase, ao abrir o aplicativo basta clicar em **"Modo Demonstração (Offline)"** no aviso inicial. Ele carregará todos os cantos e salmos da pasta `dados/` diretamente na memória do navegador.
 
 ## dados/
 
