@@ -2,14 +2,14 @@ name: Atualizar Liturgia Diária CNBB
 
 on:
   schedule:
-    # Executa todos os dias às 03:00 (BRT) / 06:00 (UTC)
-    - cron: '0 6 * * *'
+    # Executa no dia 1 de cada mês às 03:00 (BRT) / 06:00 (UTC)
+    - cron: '0 6 1 * *'
   workflow_dispatch:
     inputs:
       parametro:
-        description: 'Período a sincronizar (dias como "30", ano como "2027" ou data como "2027-04-18")'
+        description: 'Período a sincronizar ("mes" para o mês corrente, ano como "2027", data "2027-04-18" ou quantidade de dias "30")'
         required: false
-        default: '30'
+        default: 'mes'
 
 jobs:
   sincronizar:
@@ -23,11 +23,11 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Atualizar Liturgia
+      - name: Atualizar Liturgia do Mês Corrente
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
           PARAM="${{ github.event.inputs.parametro }}"
-          if [ -z "$PARAM" ]; then PARAM="30"; fi
+          if [ -z "$PARAM" ]; then PARAM="mes"; fi
           python atualizar_liturgia.py "$PARAM"

@@ -171,9 +171,27 @@ def processar_dia(url, key, dt):
 
 def main():
     url, key = obter_credenciais()
-    arg = sys.argv[1] if len(sys.argv) > 1 else "30"
+    arg = sys.argv[1] if len(sys.argv) > 1 else "mes"
 
-    # Caso 1: Data específica no formato YYYY-MM-DD
+    import calendar
+
+    # Caso 1: Mês corrente ("mes", "mes-corrente") ou mês específico (YYYY-MM)
+    if arg in ("mes", "mes-corrente", "current-month") or re.match(r"^\d{4}-\d{2}$", arg):
+        if re.match(r"^\d{4}-\d{2}$", arg):
+            ano, mes = map(int, arg.split("-"))
+        else:
+            hoje = datetime.date.today()
+            ano, mes = hoje.year, hoje.month
+
+        num_dias = calendar.monthrange(ano, mes)[1]
+        print(f"=== Sincronizando Mês Corrente ({mes:02d}/{ano} - {num_dias} dias) ===")
+        for d in range(1, num_dias + 1):
+            dt = datetime.date(ano, mes, d)
+            processar_dia(url, key, dt)
+        print(f"\n[OK] Liturgia do mês {mes:02d}/{ano} sincronizada com sucesso!")
+        return
+
+    # Caso 2: Data específica no formato YYYY-MM-DD
     if re.match(r"^\d{4}-\d{2}-\d{2}$", arg):
         ano, mes, dia = map(int, arg.split("-"))
         dt = datetime.date(ano, mes, dia)
