@@ -118,7 +118,7 @@ def main():
     for tab, arq in tabelas:
         popular_tabela(url, key, tab, arq)
 
-    print("🎉 Migração de dados concluída com sucesso!")
+    print("\n[SUCESSO] Migracao de dados concluida com sucesso!")
 
 if __name__ == "__main__":
     main()
