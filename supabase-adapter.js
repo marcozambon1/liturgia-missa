@@ -8,12 +8,27 @@
 (function(window) {
   'use strict';
 
-  function initSupabaseAdapter() {
+  function obterCredenciais() {
     var config = window.SUPABASE_CONFIG || {};
-    var url = config.url && config.url.trim();
-    var key = config.anonKey && config.anonKey.trim();
+    var url = (config.url && config.url.trim()) || 
+              (window.localStorage ? localStorage.getItem("cantos_supabase_url") : null) || 
+              "https://eifxnnwerwsfjkmzmzdw.supabase.co";
+    var key = (config.anonKey && config.anonKey.trim()) || 
+              (window.localStorage ? localStorage.getItem("cantos_supabase_key") : null) || 
+              "sb_publishable_yOeP4Wh6BCirwy2Ty3S8qw__az5l43s";
 
-    if (!url || !key || url.indexOf("SEU-PROJETO") !== -1) {
+    if (url && (url.indexOf("SEU-PROJETO") !== -1 || url.indexOf("xyzcompany") !== -1)) url = "";
+    if (key && key.indexOf("SUA-CHAVE") !== -1) key = "";
+
+    return { url: url, key: key };
+  }
+
+  function initSupabaseAdapter() {
+    var creds = obterCredenciais();
+    var url = creds.url;
+    var key = creds.key;
+
+    if (!url || !key) {
       window.supabaseDb = null;
       renderConfigBanner();
       return;
@@ -28,7 +43,13 @@
     try {
       var client = window.supabase.createClient(url, key);
       window.supabaseClient = client;
-      window.supabaseDb = createDbWrapper(client);
+      var dbWrapper = createDbWrapper(client);
+      window.supabaseDb = dbWrapper;
+      if (typeof window.reiniciarBoot === "function") {
+        window.reiniciarBoot(dbWrapper);
+      }
+      var modal = document.getElementById("supabase-config-modal");
+      if (modal) modal.remove();
     } catch(err) {
       console.error("Erro ao inicializar Supabase:", err);
       window.supabaseDb = null;
@@ -215,12 +236,13 @@
         return;
       }
       try {
-        localStorage.setItem("cantos_supabase_url", u);
-        localStorage.setItem("cantos_supabase_key", k);
-        window.location.reload();
-      } catch(e) {
-        alert("Erro ao salvar no localStorage: " + e.message);
-      }
+        if (window.localStorage) {
+          localStorage.setItem("cantos_supabase_url", u);
+          localStorage.setItem("cantos_supabase_key", k);
+        }
+      } catch(e) {}
+      container.remove();
+      initSupabaseAdapter();
     });
 
     document.getElementById("sb-btn-offline").addEventListener("click", function() {
