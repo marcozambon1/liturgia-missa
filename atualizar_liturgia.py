@@ -170,17 +170,40 @@ def processar_dia(url, key, dt):
     return True
 
 def main():
-    dias = 30
-    if len(sys.argv) > 1:
-        try:
-            dias = int(sys.argv[1])
-        except ValueError:
-            pass
-
     url, key = obter_credenciais()
+    arg = sys.argv[1] if len(sys.argv) > 1 else "30"
+
+    # Caso 1: Data específica no formato YYYY-MM-DD
+    if re.match(r"^\d{4}-\d{2}-\d{2}$", arg):
+        ano, mes, dia = map(int, arg.split("-"))
+        dt = datetime.date(ano, mes, dia)
+        print(f"=== Sincronizando data específica: {dt} ===")
+        processar_dia(url, key, dt)
+        print("\n[OK] Sincronização concluída!")
+        return
+
+    # Caso 2: Ano específico (ex.: 2027) -> sincroniza domingos e festas principais do ano
+    if re.match(r"^\d{4}$", arg) and int(arg) > 2000:
+        ano = int(arg)
+        print(f"=== Sincronizando domingos e celebrações de {ano} ===")
+        dt = datetime.date(ano, 1, 1)
+        fim = datetime.date(ano, 12, 31)
+        while dt <= fim:
+            # Sincroniza domingos (weekday == 6) e grandes solenidades fixas
+            if dt.weekday() == 6 or (dt.month == 12 and dt.day in (24, 25, 31)) or (dt.month == 1 and dt.day == 1) or (dt.month == 5 and dt.day == 31):
+                processar_dia(url, key, dt)
+            dt += datetime.timedelta(days=1)
+        print(f"\n[OK] Sincronização de domingos e festas de {ano} concluída!")
+        return
+
+    # Caso 3: Quantidade de dias contínuos a partir de hoje
+    try:
+        dias = int(arg)
+    except ValueError:
+        dias = 30
+
     hoje = datetime.date.today()
     print(f"=== Sincronizando Liturgia Diária ({dias} dias a partir de {hoje}) ===")
-
     for i in range(dias):
         dt = hoje + datetime.timedelta(days=i)
         processar_dia(url, key, dt)

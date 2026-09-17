@@ -532,6 +532,14 @@ function salmoDaMissa(m){ return itemLiturgico(m, "salmo"); }
 function cardLiturgicoHtml(it, cfg, tipo){
   var tipoNome = tipo || (cfg && cfg.col === "aclamacoes" ? "aclamacao" : "salmo");
   var dataId = it.data || it.id || (state.currentMissaId && state.missasById[state.currentMissaId] ? state.missasById[state.currentMissaId].data : "");
+  var estrofesHtml = (it.estrofes||[]).map(function(e){
+    return '<div class="sc-estrofe">'+esc(e)+'</div>';
+  }).join("");
+
+  if(!estrofesHtml && tipoNome === "aclamacao"){
+    estrofesHtml = '<div class="sc-estrofe" style="font-style:italic;color:var(--ink-dim);opacity:0.75;font-size:0.8rem;">(Versículo não informado. Clique em Editar para adicionar)</div>';
+  }
+
   return '<div class="salmo-card">' +
     '<div class="sc-head">' +
       '<span class="sc-ref">'+esc(it.referencia||cfg.rotulo)+'</span>' +
@@ -539,9 +547,7 @@ function cardLiturgicoHtml(it, cfg, tipo){
       '<button type="button" class="btn-ghost btn-edit-liturgia" data-tipo="'+esc(tipoNome)+'" data-id="'+esc(dataId)+'" style="margin-left:auto;font-size:0.75rem;padding:2px 8px;cursor:pointer;border-radius:4px;" title="Editar este texto">✏️ Editar</button>' +
     '</div>' +
     (it.refrao ? '<div class="sc-refrao">'+esc(it.refrao)+'</div>' : "") +
-    (it.estrofes||[]).map(function(e){
-      return '<div class="sc-estrofe">'+esc(e)+'</div>';
-    }).join("") +
+    estrofesHtml +
     (it.fonte ? '<div class="sc-fonte">Fonte: '+esc(it.fonte)+'</div>' : "") +
   '</div>';
 }
@@ -740,30 +746,26 @@ function buscarLiturgiaOnline(dataIso, callback){
           versiculo = ev.titulo;
         }
 
-        var estrofesAcl = versiculo ? [versiculo] : [];
-        var refraoAcl = "Aleluia, Aleluia, Aleluia.";
-        if(state.aclamacoes[dataIso]){
-          if(!versiculo && state.aclamacoes[dataIso].estrofes && state.aclamacoes[dataIso].estrofes.length > 0){
-            estrofesAcl = state.aclamacoes[dataIso].estrofes;
-          }
-          if(state.aclamacoes[dataIso].refrao){
-            refraoAcl = state.aclamacoes[dataIso].refrao;
+        // Se já existe aclamação com versículo no Supabase ou estado, preserva intacta!
+        if(state.aclamacoes[dataIso] && state.aclamacoes[dataIso].estrofes && state.aclamacoes[dataIso].estrofes.length > 0){
+          // Já sincronizada com versículo real, não faz nada
+        } else {
+          var aclamacaoDoc = {
+            id: dataIso,
+            data: dataIso,
+            liturgia: liturgiaNome,
+            referencia: ev.referencia || "Aclamação ao Evangelho",
+            refrao: "Aleluia, Aleluia, Aleluia.",
+            estrofes: versiculo ? [versiculo] : [],
+            fonte: "liturgia.up.railway.app (liturgia diária CNBB)",
+            criadoEm: new Date().toISOString()
+          };
+
+          state.aclamacoes[dataIso] = aclamacaoDoc;
+          if(versiculo){
+            promises.push(db.collection("aclamacoes").doc(dataIso).set(aclamacaoDoc));
           }
         }
-
-        var aclamacaoDoc = {
-          id: dataIso,
-          data: dataIso,
-          liturgia: liturgiaNome,
-          referencia: ev.referencia || "Aclamação ao Evangelho",
-          refrao: refraoAcl,
-          estrofes: estrofesAcl,
-          fonte: "liturgia.up.railway.app (liturgia diária CNBB)",
-          criadoEm: new Date().toISOString()
-        };
-
-        state.aclamacoes[dataIso] = aclamacaoDoc;
-        promises.push(db.collection("aclamacoes").doc(dataIso).set(aclamacaoDoc));
       }
 
       return Promise.all(promises);
