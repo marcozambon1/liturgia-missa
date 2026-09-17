@@ -574,7 +574,7 @@ function blocoLiturgicoHtml(m, tipo){
   }
   return '<div class="salmo-vazio">' +
     '<span>Nada carregado para '+esc(dataBR(m.data))+'.</span>' +
-    '<button class="btn btn-sm pedir-liturgia-btn"'+(tipo==="salmo" ? ' id="pedir-salmo-btn"' : '')+' data-data="'+esc(m.data)+'">Pedir a liturgia deste dia</button>' +
+    '<button class="btn btn-sm pedir-liturgia-btn"'+(tipo==="salmo" ? ' id="pedir-salmo-btn"' : '')+' data-data="'+esc(m.data)+'">Buscar liturgia da CNBB agora</button>' +
   '</div>';
 }
 function blocoSalmoHtml(m){ return blocoLiturgicoHtml(m, "salmo"); }
@@ -583,23 +583,98 @@ function dataBR(iso){
   var p = String(iso).split("-");
   return p.length === 3 ? p[2]+"/"+p[1]+"/"+p[0] : iso;
 }
-function pedirSalmo(data){
-  if(!data || !db) return;
-  var existente = pedidoDaData(data);
-  if(existente){
-    // não cria pedido novo: recoloca o que falhou na fila, contando a tentativa
-    db.collection("pedidos").doc(existente.id).update({
-      status: "pendente", erro: "", tentativas: (existente.tentativas || 1) + 1,
-      atualizadoEm: new Date().toISOString()
-    }).then(function(){ toast("Vou tentar de novo na próxima verificação."); })
-      .catch(aoFalharEscrita("Não foi possível registrar o pedido."));
+function buscarLiturgiaOnline(dataIso, callback){
+  if(!dataIso || !db){
+    if(callback) callback(false);
     return;
   }
-  db.collection("pedidos").add({
-    tipo: "salmo", data: data, status: "pendente", tentativas: 1,
-    criadoEm: new Date().toISOString()
-  }).then(function(){ toast("Pedido feito — o Claude busca salmo e aclamação na próxima verificação."); })
-    .catch(aoFalharEscrita("Não foi possível registrar o pedido."));
+  var parts = String(dataIso).split("-");
+  if(parts.length !== 3){
+    if(callback) callback(false);
+    return;
+  }
+  var ano = parts[0], mes = parts[1], dia = parts[2];
+  toast("Buscando liturgia da CNBB para " + dataBR(dataIso) + "…");
+
+  var urlRailway = "https://liturgia.up.railway.app/v2/?dia=" + dia + "&mes=" + mes + "&ano=" + ano;
+
+  fetch(urlRailway)
+    .then(function(res){
+      if(!res.ok) throw new Error("Status " + res.status);
+      return res.json();
+    })
+    .then(function(d){
+      var promises = [];
+      var liturgiaNome = d.liturgia || "";
+      var cor = d.cor || "";
+
+      // 1. Salmo Responsorial
+      if(d.leituras && d.leituras.salmo && d.leituras.salmo.length > 0){
+        var s = d.leituras.salmo[0];
+        var refrao = (s.refrao || "").replace(/^[—\-\s]+/, "").trim();
+        var rawTexto = s.texto || "";
+        var estrofes = rawTexto.split(/\n+/).map(function(linha){
+          return linha.replace(/^[—\-\s]+/, "").trim();
+        }).filter(Boolean);
+
+        if(estrofes.length > 0 && estrofes[0] === refrao){
+          estrofes.shift();
+        }
+
+        var salmoDoc = {
+          id: dataIso,
+          data: dataIso,
+          liturgia: liturgiaNome,
+          cor: cor,
+          referencia: s.referencia || "Salmo Responsorial",
+          refrao: refrao,
+          estrofes: estrofes,
+          fonte: "liturgia.up.railway.app (liturgia diária CNBB)",
+          criadoEm: new Date().toISOString()
+        };
+
+        state.salmos[dataIso] = salmoDoc;
+        promises.push(db.collection("salmos").doc(dataIso).set(salmoDoc));
+      }
+
+      // 2. Aclamação ao Evangelho
+      if(d.leituras && d.leituras.evangelho && d.leituras.evangelho.length > 0){
+        var ev = d.leituras.evangelho[0];
+        var versiculo = ev.titulo || "Proclamação do Evangelho";
+
+        var aclamacaoDoc = {
+          id: dataIso,
+          data: dataIso,
+          liturgia: liturgiaNome,
+          referencia: ev.referencia || "Aclamação ao Evangelho",
+          refrao: "Aleluia, Aleluia, Aleluia.",
+          estrofes: [versiculo],
+          fonte: "liturgia.up.railway.app (liturgia diária CNBB)",
+          criadoEm: new Date().toISOString()
+        };
+
+        state.aclamacoes[dataIso] = aclamacaoDoc;
+        promises.push(db.collection("aclamacoes").doc(dataIso).set(aclamacaoDoc));
+      }
+
+      return Promise.all(promises);
+    })
+    .then(function(){
+      toast("Liturgia da CNBB carregada com sucesso!");
+      renderMissaPanel();
+      renderPrintPanel();
+      if(callback) callback(true);
+    })
+    .catch(function(err){
+      console.warn("Falha ao buscar liturgia:", err);
+      toast("Não foi possível buscar a liturgia desta data.");
+      if(callback) callback(false);
+    });
+}
+
+function pedirSalmo(data){
+  if(!data) return;
+  buscarLiturgiaOnline(data);
 }
 
 /* ---------------- CONFIRMAÇÃO ----------------
@@ -1094,8 +1169,15 @@ document.getElementById("missa-nome").addEventListener("input", function(e){
 });
 document.getElementById("missa-data").addEventListener("change", function(e){
   var m = currentMissa(); if(!m) return;
-  db.collection("missas").doc(m.id).update({data: e.target.value, atualizadoEm: new Date().toISOString()})
+  var novaData = e.target.value;
+  m.data = novaData;
+  db.collection("missas").doc(m.id).update({data: novaData, atualizadoEm: new Date().toISOString()})
     .catch(aoFalharEscrita("Não foi possível salvar a data."));
+  renderMissaPanel();
+  renderPrintPanel();
+  if(novaData && (!state.salmos[novaData] || !state.aclamacoes[novaData])){
+    buscarLiturgiaOnline(novaData);
+  }
 });
 document.getElementById("print-missa-select").addEventListener("change", function(e){
   state.currentMissaId = e.target.value;
