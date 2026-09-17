@@ -967,8 +967,10 @@ document.getElementById("picker-search").addEventListener("input", renderPickerL
 document.getElementById("picker-all-cats").addEventListener("change", renderPickerList);
 
 function ensureMissaObjExists(m){
-  var momentos = {};
-  MOMENTOS.forEach(function(mo){ momentos[mo.id] = (m.momentos && m.momentos[mo.id]) || []; });
+  var momentos = Object.assign({}, (m && m.momentos) || {});
+  MOMENTOS.forEach(function(mo){
+    if(!Array.isArray(momentos[mo.id])) momentos[mo.id] = [];
+  });
   return momentos;
 }
 
@@ -986,8 +988,12 @@ function addSongToMoment(missaId, momentoId, numero, tomTarget){
   var momentos = ensureMissaObjExists(m);
   var entry = encodeMissaEntry(numStr, tomTarget, origRoot);
   momentos[momentoId] = momentos[momentoId].concat([entry]);
-  var patch = {}; patch[momentoId] = momentos[momentoId];
-  db.collection("missas").doc(missaId).update({momentos: patch, atualizadoEm: new Date().toISOString()})
+
+  // Atualização otimista imediata para resposta instantânea na interface
+  m.momentos = Object.assign({}, momentos);
+  renderMissaPanel();
+
+  db.collection("missas").doc(missaId).update({momentos: momentos, atualizadoEm: new Date().toISOString()})
     .then(function(){ toast("Adicionado!"); })
     .catch(aoFalharEscrita("Não foi possível salvar."));
 }
@@ -1000,8 +1006,11 @@ function setSongTomInMoment(momentoId, idx, newRoot){
   var song = getSong(Number(parsed.numeroStr));
   var origRoot = song ? rootLetter(song.tom) : newRoot;
   arr[idx] = encodeMissaEntry(parsed.numeroStr, newRoot, origRoot);
-  var patch = {}; patch[momentoId] = arr;
-  db.collection("missas").doc(m.id).update({momentos: patch, atualizadoEm: new Date().toISOString()})
+  momentos[momentoId] = arr;
+  m.momentos = Object.assign({}, momentos);
+  renderMissaPanel();
+
+  db.collection("missas").doc(m.id).update({momentos: momentos, atualizadoEm: new Date().toISOString()})
     .catch(aoFalharEscrita("Não foi possível salvar a alteração."));
 }
 function removeFromMoment(momentoId, idx){
@@ -1009,8 +1018,11 @@ function removeFromMoment(momentoId, idx){
   var momentos = ensureMissaObjExists(m);
   var arr = momentos[momentoId].slice();
   arr.splice(idx,1);
-  var patch = {}; patch[momentoId] = arr;
-  db.collection("missas").doc(m.id).update({momentos: patch, atualizadoEm: new Date().toISOString()})
+  momentos[momentoId] = arr;
+  m.momentos = Object.assign({}, momentos);
+  renderMissaPanel();
+
+  db.collection("missas").doc(m.id).update({momentos: momentos, atualizadoEm: new Date().toISOString()})
     .catch(aoFalharEscrita("Não foi possível salvar a alteração."));
 }
 function moveInMoment(momentoId, idx, dir){
@@ -1020,8 +1032,11 @@ function moveInMoment(momentoId, idx, dir){
   var j = idx+dir;
   if(j<0 || j>=arr.length) return;
   var tmp = arr[idx]; arr[idx]=arr[j]; arr[j]=tmp;
-  var patch = {}; patch[momentoId] = arr;
-  db.collection("missas").doc(m.id).update({momentos: patch, atualizadoEm: new Date().toISOString()})
+  momentos[momentoId] = arr;
+  m.momentos = Object.assign({}, momentos);
+  renderMissaPanel();
+
+  db.collection("missas").doc(m.id).update({momentos: momentos, atualizadoEm: new Date().toISOString()})
     .catch(aoFalharEscrita("Não foi possível salvar a alteração."));
 }
 

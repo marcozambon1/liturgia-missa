@@ -57,14 +57,51 @@
     }
   }
 
+  function deepMerge(target, source) {
+    var out = Object.assign({}, target);
+    if (!source || typeof source !== "object") return out;
+    Object.keys(source).forEach(function(key) {
+      if (source[key] && typeof source[key] === "object" && !Array.isArray(source[key])) {
+        out[key] = deepMerge(target && target[key] ? target[key] : {}, source[key]);
+      } else {
+        out[key] = source[key];
+      }
+    });
+    return out;
+  }
+
   function createDbWrapper(client) {
+    var colCaches = {};
+    var colListeners = {};
+
+    function notify(colName) {
+      var cache = colCaches[colName] || {};
+      var docs = Object.keys(cache).map(function(k) {
+        return {
+          id: k,
+          data: function() { return Object.assign({}, cache[k]); }
+        };
+      });
+      var listeners = colListeners[colName] || [];
+      listeners.forEach(function(cb) {
+        try { cb({ docs: docs }); } catch(e) { console.error("Erro no listener da colecao " + colName + ":", e); }
+      });
+    }
+
     return {
       collection: function(colName) {
+        if (!colCaches[colName]) colCaches[colName] = {};
+        if (!colListeners[colName]) colListeners[colName] = [];
+
         return {
           doc: function(id) {
             var docId = String(id);
             return {
               set: function(data) {
+                // Atualização otimista imediata no cache local
+                colCaches[colName][docId] = Object.assign({}, data);
+                notify(colName);
+
                 return client
                   .from(colName)
                   .upsert({ id: docId, data: data, updated_at: new Date().toISOString() })
@@ -74,17 +111,25 @@
                   });
               },
               update: function(patch) {
+                // Atualização otimista imediata com deepMerge
+                var currentLocal = colCaches[colName][docId] || {};
+                var merged = deepMerge(currentLocal, patch);
+                colCaches[colName][docId] = merged;
+                notify(colName);
+
+                // Envia para o Supabase
                 return client
                   .from(colName)
                   .select('data')
                   .eq('id', docId)
                   .single()
                   .then(function(res) {
-                    var currentData = (res.data && res.data.data) ? res.data.data : {};
-                    var merged = Object.assign({}, currentData, patch);
+                    var currentServer = (res.data && res.data.data) ? res.data.data : currentLocal;
+                    var finalMerged = deepMerge(currentServer, merged);
+                    colCaches[colName][docId] = finalMerged;
                     return client
                       .from(colName)
-                      .update({ data: merged, updated_at: new Date().toISOString() })
+                      .update({ data: finalMerged, updated_at: new Date().toISOString() })
                       .eq('id', docId);
                   })
                   .then(function(res) {
@@ -93,6 +138,9 @@
                   });
               },
               delete: function() {
+                delete colCaches[colName][docId];
+                notify(colName);
+
                 return client
                   .from(colName)
                   .delete()
@@ -109,6 +157,9 @@
               ? String(data.id) 
               : ('doc_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 6));
             
+            colCaches[colName][generatedId] = Object.assign({}, data);
+            notify(colName);
+
             return client
               .from(colName)
               .insert({ id: generatedId, data: data, updated_at: new Date().toISOString() })
@@ -118,16 +169,11 @@
               });
           },
           onSnapshot: function(callback, errorCallback) {
-            var cache = {};
+            colListeners[colName].push(callback);
 
-            function emit() {
-              var docs = Object.keys(cache).map(function(k) {
-                return {
-                  id: k,
-                  data: function() { return Object.assign({}, cache[k]); }
-                };
-              });
-              callback({ docs: docs });
+            // Emite imediatamente se já houver dados no cache
+            if (Object.keys(colCaches[colName]).length > 0) {
+              notify(colName);
             }
 
             // 1. Carga inicial via REST
@@ -140,11 +186,11 @@
                   if (errorCallback) errorCallback(res.error);
                   return;
                 }
-                cache = {};
                 (res.data || []).forEach(function(row) {
-                  cache[row.id] = row.data;
+                  // Preserva dados locais mais recentes se houver
+                  colCaches[colName][row.id] = deepMerge(row.data, colCaches[colName][row.id] || {});
                 });
-                emit();
+                notify(colName);
               })
               .catch(function(err) {
                 console.error("Falha ao buscar " + colName + ":", err);
@@ -157,13 +203,13 @@
               .on('postgres_changes', { event: '*', schema: 'public', table: colName }, function(payload) {
                 if (payload.eventType === 'DELETE') {
                   if (payload.old && payload.old.id) {
-                    delete cache[payload.old.id];
-                    emit();
+                    delete colCaches[colName][payload.old.id];
+                    notify(colName);
                   }
                 } else if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
                   if (payload.new && payload.new.id) {
-                    cache[payload.new.id] = payload.new.data;
-                    emit();
+                    colCaches[colName][payload.new.id] = payload.new.data;
+                    notify(colName);
                   }
                 }
               })
@@ -171,6 +217,8 @@
 
             // Retorna função para cancelar inscrição
             return function() {
+              var idx = colListeners[colName].indexOf(callback);
+              if (idx !== -1) colListeners[colName].splice(idx, 1);
               client.removeChannel(channel);
             };
           }
@@ -290,7 +338,7 @@
                 return Promise.resolve();
               },
               update: function(patch) {
-                memoria[colName][docId] = Object.assign({}, memoria[colName][docId] || {}, patch);
+                memoria[colName][docId] = deepMerge(memoria[colName][docId] || {}, patch);
                 triggerSnap(colName);
                 return Promise.resolve();
               },
