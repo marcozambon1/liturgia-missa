@@ -529,11 +529,14 @@ function itemLiturgico(m, tipo){
   return mapa[m.data] || null;
 }
 function salmoDaMissa(m){ return itemLiturgico(m, "salmo"); }
-function cardLiturgicoHtml(it, cfg){
+function cardLiturgicoHtml(it, cfg, tipo){
+  var tipoNome = tipo || (cfg && cfg.col === "aclamacoes" ? "aclamacao" : "salmo");
+  var dataId = it.data || it.id || (state.currentMissaId && state.missasById[state.currentMissaId] ? state.missasById[state.currentMissaId].data : "");
   return '<div class="salmo-card">' +
     '<div class="sc-head">' +
       '<span class="sc-ref">'+esc(it.referencia||cfg.rotulo)+'</span>' +
       (it.liturgia ? '<span class="sc-dia">'+esc(it.liturgia)+'</span>' : "") +
+      '<button type="button" class="btn-ghost btn-edit-liturgia" data-tipo="'+esc(tipoNome)+'" data-id="'+esc(dataId)+'" style="margin-left:auto;font-size:0.75rem;padding:2px 8px;cursor:pointer;border-radius:4px;" title="Editar este texto">✏️ Editar</button>' +
     '</div>' +
     (it.refrao ? '<div class="sc-refrao">'+esc(it.refrao)+'</div>' : "") +
     (it.estrofes||[]).map(function(e){
@@ -542,7 +545,7 @@ function cardLiturgicoHtml(it, cfg){
     (it.fonte ? '<div class="sc-fonte">Fonte: '+esc(it.fonte)+'</div>' : "") +
   '</div>';
 }
-function salmoCardHtml(sl){ return cardLiturgicoHtml(sl, LITURGICOS.salmo); }
+function salmoCardHtml(sl){ return cardLiturgicoHtml(sl, LITURGICOS.salmo, "salmo"); }
 function pedidoDaData(data){
   var achados = state.pedidos.filter(function(p){ return p.tipo === "salmo" && p.data === data; });
   // um pendente manda mais que um erro antigo da mesma data
@@ -559,7 +562,7 @@ function blocoLiturgicoHtml(m, tipo){
     return '<div class="salmo-vazio">Escolha a data da missa para trazer '+cfg.artigo+' do dia.</div>';
   }
   var it = itemLiturgico(m, tipo);
-  if(it) return cardLiturgicoHtml(it, cfg);
+  if(it) return cardLiturgicoHtml(it, cfg, tipo);
   var ped = pedidoDaData(m.data);
   if(ped && ped.status === "pendente"){
     return '<div class="salmo-vazio">Liturgia de '+esc(dataBR(m.data))+' na fila — o Claude busca na próxima verificação, amanhã de manhã.</div>';
@@ -569,12 +572,18 @@ function blocoLiturgicoHtml(m, tipo){
   if(ped && ped.status !== "pendente"){
     return '<div class="salmo-vazio">' +
       '<span>A fonte não devolveu '+cfg.artigo+' de '+esc(dataBR(m.data))+'. Isso costuma ser falha do site que publica a liturgia.</span>' +
-      '<button class="btn btn-sm pedir-liturgia-btn" data-data="'+esc(m.data)+'">Tentar de novo</button>' +
+      '<div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">' +
+        '<button class="btn btn-sm pedir-liturgia-btn" data-data="'+esc(m.data)+'">Tentar de novo</button>' +
+        '<button class="btn btn-sm btn-ghost btn-edit-liturgia" data-tipo="'+esc(tipo)+'" data-id="'+esc(m.data)+'">✏️ Digitar manualmente</button>' +
+      '</div>' +
     '</div>';
   }
   return '<div class="salmo-vazio">' +
     '<span>Nada carregado para '+esc(dataBR(m.data))+'.</span>' +
-    '<button class="btn btn-sm pedir-liturgia-btn"'+(tipo==="salmo" ? ' id="pedir-salmo-btn"' : '')+' data-data="'+esc(m.data)+'">Buscar liturgia da CNBB agora</button>' +
+    '<div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">' +
+      '<button class="btn btn-sm pedir-liturgia-btn"'+(tipo==="salmo" ? ' id="pedir-salmo-btn"' : '')+' data-data="'+esc(m.data)+'">Buscar liturgia da CNBB agora</button>' +
+      '<button class="btn btn-sm btn-ghost btn-edit-liturgia" data-tipo="'+esc(tipo)+'" data-id="'+esc(m.data)+'">✏️ Digitar manualmente</button>' +
+    '</div>' +
   '</div>';
 }
 function blocoSalmoHtml(m){ return blocoLiturgicoHtml(m, "salmo"); }
@@ -583,6 +592,92 @@ function dataBR(iso){
   var p = String(iso).split("-");
   return p.length === 3 ? p[2]+"/"+p[1]+"/"+p[0] : iso;
 }
+
+var liturgiaEmEdicao = { tipo: null, data: null };
+
+function abrirEditLiturgia(tipo, dataIso){
+  liturgiaEmEdicao = { tipo: tipo, data: dataIso };
+  var isAclamacao = tipo === "aclamacao";
+  var mapa = isAclamacao ? state.aclamacoes : state.salmos;
+  var it = mapa[dataIso] || null;
+
+  var tit = document.getElementById("edit-liturgia-title");
+  if(tit){
+    tit.textContent = (isAclamacao ? "Editar Aclamação ao Evangelho" : "Editar Salmo Responsorial") + (dataIso ? " (" + dataBR(dataIso) + ")" : "");
+  }
+  var lbl = document.getElementById("edit-liturgia-texto-label");
+  if(lbl){
+    lbl.textContent = isAclamacao ? "Versículo da Aclamação" : "Estrofes do Salmo (uma por linha)";
+  }
+
+  if(it){
+    document.getElementById("edit-liturgia-ref").value = it.referencia || "";
+    document.getElementById("edit-liturgia-refrao").value = it.refrao || "";
+    document.getElementById("edit-liturgia-estrofes").value = (it.estrofes || []).join("\n");
+  } else {
+    document.getElementById("edit-liturgia-ref").value = isAclamacao ? "Aclamação ao Evangelho" : "Salmo Responsorial";
+    document.getElementById("edit-liturgia-refrao").value = isAclamacao ? "Aleluia, Aleluia, Aleluia." : "";
+    document.getElementById("edit-liturgia-estrofes").value = "";
+  }
+
+  var ov = document.getElementById("edit-liturgia-overlay");
+  if(ov) ov.classList.add("open");
+}
+
+function fecharEditLiturgia(){
+  var ov = document.getElementById("edit-liturgia-overlay");
+  if(ov) ov.classList.remove("open");
+  liturgiaEmEdicao = { tipo: null, data: null };
+}
+
+function salvarEditLiturgia(){
+  if(!liturgiaEmEdicao.tipo || !liturgiaEmEdicao.data){
+    fecharEditLiturgia();
+    return;
+  }
+  var tipo = liturgiaEmEdicao.tipo;
+  var dataIso = liturgiaEmEdicao.data;
+  var isAclamacao = tipo === "aclamacao";
+  var col = isAclamacao ? "aclamacoes" : "salmos";
+  var mapa = isAclamacao ? state.aclamacoes : state.salmos;
+  var itExistente = mapa[dataIso] || {};
+
+  var refVal = document.getElementById("edit-liturgia-ref").value.trim();
+  var refraoVal = document.getElementById("edit-liturgia-refrao").value.trim();
+  var rawEstrofes = document.getElementById("edit-liturgia-estrofes").value;
+  var estrofesArr = rawEstrofes.split("\n").map(function(s){ return s.trim(); }).filter(Boolean);
+
+  var docAtualizado = {
+    id: dataIso,
+    data: dataIso,
+    liturgia: itExistente.liturgia || "",
+    cor: itExistente.cor || "",
+    referencia: refVal || (isAclamacao ? "Aclamação ao Evangelho" : "Salmo Responsorial"),
+    refrao: refraoVal,
+    estrofes: estrofesArr,
+    fonte: "Editado manualmente",
+    atualizadoEm: new Date().toISOString()
+  };
+
+  mapa[dataIso] = docAtualizado;
+  renderMissaPanel();
+  renderPrintPanel();
+  fecharEditLiturgia();
+
+  if(db){
+    db.collection(col).doc(dataIso).set(docAtualizado)
+      .then(function(){
+        toast("Liturgia atualizada com sucesso!");
+      })
+      .catch(function(err){
+        console.error("Erro ao salvar liturgia:", err);
+        toast("Erro ao salvar no banco de dados.");
+      });
+  } else {
+    toast("Salvo localmente!");
+  }
+}
+
 function buscarLiturgiaOnline(dataIso, callback){
   if(!dataIso || !db){
     if(callback) callback(false);
@@ -640,15 +735,29 @@ function buscarLiturgiaOnline(dataIso, callback){
       // 2. Aclamação ao Evangelho
       if(d.leituras && d.leituras.evangelho && d.leituras.evangelho.length > 0){
         var ev = d.leituras.evangelho[0];
-        var versiculo = ev.titulo || "Proclamação do Evangelho";
+        var versiculo = "";
+        if(ev.titulo && !ev.titulo.toLowerCase().startsWith("proclamação") && !ev.titulo.toLowerCase().startsWith("proclamacao")){
+          versiculo = ev.titulo;
+        }
+
+        var estrofesAcl = versiculo ? [versiculo] : [];
+        var refraoAcl = "Aleluia, Aleluia, Aleluia.";
+        if(state.aclamacoes[dataIso]){
+          if(!versiculo && state.aclamacoes[dataIso].estrofes && state.aclamacoes[dataIso].estrofes.length > 0){
+            estrofesAcl = state.aclamacoes[dataIso].estrofes;
+          }
+          if(state.aclamacoes[dataIso].refrao){
+            refraoAcl = state.aclamacoes[dataIso].refrao;
+          }
+        }
 
         var aclamacaoDoc = {
           id: dataIso,
           data: dataIso,
           liturgia: liturgiaNome,
           referencia: ev.referencia || "Aclamação ao Evangelho",
-          refrao: "Aleluia, Aleluia, Aleluia.",
-          estrofes: [versiculo],
+          refrao: refraoAcl,
+          estrofes: estrofesAcl,
           fonte: "liturgia.up.railway.app (liturgia diária CNBB)",
           criadoEm: new Date().toISOString()
         };
@@ -972,6 +1081,11 @@ document.getElementById("missa-momentos").addEventListener("click", function(e){
   if(addBtn){ openSongPicker(addBtn.getAttribute("data-momento")); return; }
   var pedir = e.target.closest(".pedir-liturgia-btn");
   if(pedir){ pedirSalmo(pedir.getAttribute("data-data")); return; }
+  var editLit = e.target.closest(".btn-edit-liturgia");
+  if(editLit){
+    abrirEditLiturgia(editLit.getAttribute("data-tipo"), editLit.getAttribute("data-id"));
+    return;
+  }
   var olho = e.target.closest("[data-ver]");
   if(olho){ openSongDetail(Number(olho.getAttribute("data-ver")), {somenteLeitura:true}); return; }
   var actBtn = e.target.closest("[data-act]");
@@ -989,6 +1103,20 @@ document.getElementById("missa-momentos").addEventListener("change", function(e)
   var sel = e.target.closest(".ms-tom-select");
   if(!sel) return;
   setSongTomInMoment(sel.getAttribute("data-momento"), Number(sel.getAttribute("data-idx")), sel.value);
+});
+
+var editLitClose = document.getElementById("edit-liturgia-close");
+if(editLitClose) editLitClose.addEventListener("click", fecharEditLiturgia);
+
+var editLitCancel = document.getElementById("edit-liturgia-cancelar");
+if(editLitCancel) editLitCancel.addEventListener("click", fecharEditLiturgia);
+
+var editLitSalvar = document.getElementById("edit-liturgia-salvar");
+if(editLitSalvar) editLitSalvar.addEventListener("click", salvarEditLiturgia);
+
+var editLitOverlay = document.getElementById("edit-liturgia-overlay");
+if(editLitOverlay) editLitOverlay.addEventListener("click", function(e){
+  if(e.target.id === "edit-liturgia-overlay") fecharEditLiturgia();
 });
 
 function openSongPicker(momentoId){

@@ -209,6 +209,33 @@ Aqui vai a letra, e o acorde fica em cima da sílaba"></textarea>
   </div>
 </div>
 
+<div class="overlay" id="edit-liturgia-overlay">
+  <div class="sheet" style="max-width:500px;">
+    <div class="sheet-head">
+      <div><h2 id="edit-liturgia-title" style="font-size:1.1rem;">Editar Liturgia</h2></div>
+      <button class="sheet-close" id="edit-liturgia-close" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="sheet-body" style="max-height:none;">
+      <div class="field" style="margin-bottom:12px;">
+        <label>Referência bíblica</label>
+        <input type="text" id="edit-liturgia-ref">
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label>Refrão</label>
+        <input type="text" id="edit-liturgia-refrao">
+      </div>
+      <div class="field" style="margin-bottom:16px;">
+        <label id="edit-liturgia-texto-label">Versículo / Estrofes (uma por linha)</label>
+        <textarea id="edit-liturgia-estrofes" rows="4" style="width:100%;box-sizing:border-box;font-family:inherit;padding:8px;border-radius:6px;border:1px solid #ccc;"></textarea>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;">
+        <button class="btn btn-ghost" id="edit-liturgia-cancelar">Cancelar</button>
+        <button class="btn btn-primary" id="edit-liturgia-salvar">Salvar no Supabase</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <!-- Supabase SDK e Adaptador -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

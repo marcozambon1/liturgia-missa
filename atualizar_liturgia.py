@@ -152,7 +152,7 @@ def processar_dia(url, key, dt):
     if evangelhos:
         ev = evangelhos[0]
         versiculo_raspado = raspar_versiculo_aclamacao(data_iso)
-        versiculo_final = versiculo_raspado if versiculo_raspado else (ev.get("titulo") or "Proclamação do Evangelho")
+        estrofes = [versiculo_raspado] if versiculo_raspado else []
 
         aclamacao_doc = {
             "id": data_iso,
@@ -160,8 +160,8 @@ def processar_dia(url, key, dt):
             "liturgia": liturgia_nome,
             "referencia": ev.get("referencia", "Aclamação ao Evangelho"),
             "refrao": "Aleluia, Aleluia, Aleluia.",
-            "estrofes": [versiculo_final],
-            "fonte": "Liturgia Diária (CNBB / Canção Nova)",
+            "estrofes": estrofes,
+            "fonte": "Liturgia Diária CNBB",
             "criadoEm": datetime.datetime.now(datetime.timezone.utc).isoformat()
         }
         enviar_doc(url, key, "aclamacoes", data_iso, aclamacao_doc)
