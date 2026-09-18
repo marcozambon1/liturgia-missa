@@ -50,6 +50,12 @@ create table if not exists public.config (
   updated_at timestamptz default now()
 );
 
+create table if not exists public.repertorios (
+  id text primary key,
+  data jsonb not null default '{}'::jsonb,
+  updated_at timestamptz default now()
+);
+
 -- 2. Habilitação de Row Level Security (RLS)
 alter table public.songs enable row level security;
 alter table public.missas enable row level security;
@@ -58,6 +64,7 @@ alter table public.salmos enable row level security;
 alter table public.aclamacoes enable row level security;
 alter table public.pedidos enable row level security;
 alter table public.config enable row level security;
+alter table public.repertorios enable row level security;
 
 -- 3. Políticas de Acesso Público (Leitura e Escrita via chave anon)
 -- Permite que os membros do grupo acessem e atualizem os cantos e missas
@@ -68,6 +75,7 @@ create policy "Acesso público salmos" on public.salmos for all using (true) wit
 create policy "Acesso público aclamacoes" on public.aclamacoes for all using (true) with check (true);
 create policy "Acesso público pedidos" on public.pedidos for all using (true) with check (true);
 create policy "Acesso público config" on public.config for all using (true) with check (true);
+create policy "Acesso público repertorios" on public.repertorios for all using (true) with check (true);
 
 -- 4. Habilitação do Realtime
 -- Adiciona as tabelas à publicação realtime para sincronização instantânea
@@ -99,6 +107,10 @@ begin
 
   begin
     alter publication supabase_realtime add table public.config;
+  exception when duplicate_object then null; end;
+
+  begin
+    alter publication supabase_realtime add table public.repertorios;
   exception when duplicate_object then null; end;
 end;
 $$;

@@ -79,6 +79,8 @@ var state = {
   songsById: {},
   missas: [],
   missasById: {},
+  repertorios: [],
+  repertoriosById: {},
   pedidos: [],
   rascunhos: [],      // cadastros começados e ainda não salvos no livro
   salmos: {},           // salmo do dia por data (YYYY-MM-DD)
@@ -89,6 +91,8 @@ var state = {
   libSearch: "",
   openCats: {},      // categorias expandidas na visão "Por momento"
   currentMissaId: null,
+  currentRepertorioId: null,
+  printAlvo: null,     // {tipo:"missa"|"repertorio", id} — o que a aba Imprimir mostra
   detailSong: null,
   detailTom: null,
   previewMomento: null,   // momento que a prévia do seletor vai preencher
@@ -993,7 +997,7 @@ function openMomentoChooser(numero){
   var s = getSong(numero);
   document.getElementById("picker-title").textContent = "Adicionar “"+s.titulo+"” a qual momento?";
   document.getElementById("picker-search").style.display = "none";
-  document.getElementById("picker-all-cats").parentElement.style.display = "none";
+  document.getElementById("picker-categoria").parentElement.style.display = "none";
   var list = document.getElementById("picker-list");
   list.innerHTML = MOMENTOS.map(function(m){
     return '<div class="picker-row" data-momento="'+m.id+'"><span class="titulo">'+esc(m.nome)+'</span></div>';
@@ -1017,15 +1021,37 @@ document.getElementById("picker-overlay").addEventListener("click", function(e){
 function currentMissa(){ return state.missasById[state.currentMissaId]; }
 
 function renderMissaSelect(){
-  var selects = [document.getElementById("missa-select"), document.getElementById("print-missa-select")];
+  var sel = document.getElementById("missa-select");
   var opts = sortedMissas().map(function(m){
     return '<option value="'+m.id+'">'+esc(m.nome||"(sem nome)")+(m.data? " — "+m.data:"")+'</option>';
   }).join("");
-  selects.forEach(function(sel){
-    var prev = sel.value;
-    sel.innerHTML = opts || '<option value="">Nenhuma missa</option>';
-    if(state.missasById[prev]) sel.value = prev; else if(state.currentMissaId) sel.value = state.currentMissaId;
-  });
+  var prev = sel.value;
+  sel.innerHTML = opts || '<option value="">Nenhuma missa</option>';
+  if(state.missasById[prev]) sel.value = prev; else if(state.currentMissaId) sel.value = state.currentMissaId;
+}
+function renderPrintSelect(){
+  var sel = document.getElementById("print-missa-select");
+  var prev = sel.value;
+  var missaOpts = sortedMissas().map(function(m){
+    return '<option value="missa:'+m.id+'">'+esc(m.nome||"(sem nome)")+(m.data? " — "+m.data:"")+'</option>';
+  }).join("");
+  var repOpts = sortedRepertorios().map(function(r){
+    return '<option value="repertorio:'+r.id+'">'+esc(r.nome||"(sem nome)")+'</option>';
+  }).join("");
+  var html = "";
+  if(missaOpts) html += '<optgroup label="Missas">'+missaOpts+'</optgroup>';
+  if(repOpts) html += '<optgroup label="Repertórios">'+repOpts+'</optgroup>';
+  sel.innerHTML = html || '<option value="">Nenhuma missa ou repertório</option>';
+  var alvoAtual = state.printAlvo ? (state.printAlvo.tipo+":"+state.printAlvo.id) : "";
+  if(alvoAtual && html.indexOf('value="'+alvoAtual+'"') !== -1){
+    sel.value = alvoAtual;
+  } else if(html.indexOf('value="'+prev+'"') !== -1){
+    sel.value = prev;
+  } else if(state.currentMissaId && html.indexOf('value="missa:'+state.currentMissaId+'"') !== -1){
+    sel.value = "missa:"+state.currentMissaId;
+  }
+  var parts = (sel.value||"").split(":");
+  state.printAlvo = parts[0] ? {tipo: parts[0], id: parts.slice(1).join(":")} : null;
 }
 function sortedMissas(){
   return state.missas.slice().sort(function(a,b){
@@ -1121,30 +1147,52 @@ if(editLitOverlay) editLitOverlay.addEventListener("click", function(e){
   if(e.target.id === "edit-liturgia-overlay") fecharEditLiturgia();
 });
 
+var PICKER_PAGE = 80;
+var pickerRenderCount = PICKER_PAGE;
+function preencherPickerCategorias(padrao){
+  var sel = document.getElementById("picker-categoria");
+  sel.innerHTML = '<option value="">Todas as categorias</option>' + CATEGORIAS_LIVRO.map(function(c){
+    return '<option value="'+esc(c)+'">'+esc(c)+'</option>';
+  }).join("");
+  sel.value = padrao || "";
+}
 function openSongPicker(momentoId){
   var mo = MOMENTOS.filter(function(x){ return x.id===momentoId; })[0];
   state.pickerCtx = {mode:"add-to-momento", momentoId: momentoId, onlyCat: mo.cat};
   document.getElementById("picker-title").textContent = "Adicionar canto — "+mo.nome;
   document.getElementById("picker-search").style.display = "";
   document.getElementById("picker-search").value = "";
-  var allCatsToggle = document.getElementById("picker-all-cats");
-  allCatsToggle.parentElement.style.display = mo.cat ? "" : "none";
-  allCatsToggle.checked = !mo.cat;
+  document.getElementById("picker-categoria").parentElement.style.display = "";
+  preencherPickerCategorias(mo.cat);
+  pickerRenderCount = PICKER_PAGE;
+  renderPickerList();
+  document.getElementById("picker-overlay").classList.add("open");
+  document.getElementById("picker-search").focus();
+}
+function openBlocoSongPicker(repertorioId, blocoIdx, blocoNome){
+  state.pickerCtx = {mode:"add-to-bloco", repertorioId: repertorioId, blocoIdx: blocoIdx};
+  document.getElementById("picker-title").textContent = "Adicionar canto — "+(blocoNome || "bloco");
+  document.getElementById("picker-search").style.display = "";
+  document.getElementById("picker-search").value = "";
+  document.getElementById("picker-categoria").parentElement.style.display = "";
+  preencherPickerCategorias(null);
+  pickerRenderCount = PICKER_PAGE;
   renderPickerList();
   document.getElementById("picker-overlay").classList.add("open");
   document.getElementById("picker-search").focus();
 }
 function renderPickerList(){
   var ctx = state.pickerCtx;
-  if(!ctx || ctx.mode !== "add-to-momento") return;
+  if(!ctx || (ctx.mode !== "add-to-momento" && ctx.mode !== "add-to-bloco")) return;
   var q = normBusca(document.getElementById("picker-search").value);
-  var allCats = document.getElementById("picker-all-cats").checked;
-  var list = state.songs.filter(function(s){
-    if(!allCats && ctx.onlyCat && s.categoria !== ctx.onlyCat) return false;
+  var cat = document.getElementById("picker-categoria").value;
+  var full = state.songs.filter(function(s){
+    if(cat && s.categoria !== cat) return false;
     if(!q) return true;
     return combinaBusca(s, q);
   });
-  list = sortedByNumero(list).slice(0, 200);
+  full = sortedByNumero(full);
+  var list = full.slice(0, pickerRenderCount);
   var el = document.getElementById("picker-list");
   if(!list.length){ el.innerHTML = '<div class="empty">Nada encontrado.</div>'; return; }
   el.innerHTML = list.map(function(s){
@@ -1159,17 +1207,33 @@ function renderPickerList(){
     var olho = e.target.closest("[data-ver]");
     if(olho){
       e.stopPropagation();
-      abrirPreviaDoPicker(Number(olho.getAttribute("data-ver")), ctx.momentoId);
+      if(ctx.mode === "add-to-momento") abrirPreviaDoPicker(Number(olho.getAttribute("data-ver")), ctx.momentoId);
+      else openSongDetail(Number(olho.getAttribute("data-ver")), {somenteLeitura:true});
       return;
     }
     var row = e.target.closest(".picker-row");
     if(!row) return;
-    addSongToMoment(state.currentMissaId, ctx.momentoId, Number(row.getAttribute("data-numero")));
+    var numero = Number(row.getAttribute("data-numero"));
+    if(ctx.mode === "add-to-momento") addSongToMoment(state.currentMissaId, ctx.momentoId, numero);
+    else addSongToBloco(ctx.repertorioId, ctx.blocoIdx, numero);
     document.getElementById("picker-overlay").classList.remove("open");
   };
+  el.onscroll = function(){
+    if(pickerRenderCount >= full.length) return;
+    if(el.scrollTop + el.clientHeight >= el.scrollHeight - 40){
+      pickerRenderCount += PICKER_PAGE;
+      renderPickerList();
+    }
+  };
 }
-document.getElementById("picker-search").addEventListener("input", renderPickerList);
-document.getElementById("picker-all-cats").addEventListener("change", renderPickerList);
+document.getElementById("picker-search").addEventListener("input", function(){
+  pickerRenderCount = PICKER_PAGE;
+  renderPickerList();
+});
+document.getElementById("picker-categoria").addEventListener("change", function(){
+  pickerRenderCount = PICKER_PAGE;
+  renderPickerList();
+});
 
 function ensureMissaObjExists(m){
   var momentos = Object.assign({}, (m && m.momentos) || {});
@@ -1310,10 +1374,249 @@ document.getElementById("missa-data").addEventListener("change", function(e){
   }
 });
 document.getElementById("print-missa-select").addEventListener("change", function(e){
-  state.currentMissaId = e.target.value;
-  try{ localStorage.setItem("cantos_missa_atual", state.currentMissaId); }catch(err){}
-  renderMissaPanel();
+  var parts = (e.target.value||"").split(":");
+  state.printAlvo = parts[0] ? {tipo: parts[0], id: parts.slice(1).join(":")} : null;
+  if(state.printAlvo && state.printAlvo.tipo === "missa"){
+    state.currentMissaId = state.printAlvo.id;
+    try{ localStorage.setItem("cantos_missa_atual", state.currentMissaId); }catch(err){}
+    renderMissaPanel();
+  } else if(state.printAlvo && state.printAlvo.tipo === "repertorio"){
+    state.currentRepertorioId = state.printAlvo.id;
+    try{ localStorage.setItem("cantos_repertorio_atual", state.currentRepertorioId); }catch(err){}
+    renderRepertorioPanel();
+  }
   renderPrintPanel();
+});
+
+/* ---------------- REPERTÓRIO ---------------- */
+function currentRepertorio(){ return state.repertoriosById[state.currentRepertorioId]; }
+function sortedRepertorios(){
+  return state.repertorios.slice().sort(function(a,b){
+    return (b.criadoEm||"").localeCompare(a.criadoEm||"");
+  });
+}
+function renderRepertorioSelect(){
+  var sel = document.getElementById("repertorio-select");
+  var prev = sel.value;
+  var opts = sortedRepertorios().map(function(r){
+    return '<option value="'+r.id+'">'+esc(r.nome||"(sem nome)")+'</option>';
+  }).join("");
+  sel.innerHTML = opts || '<option value="">Nenhum repertório</option>';
+  if(state.repertoriosById[prev]) sel.value = prev; else if(state.currentRepertorioId) sel.value = state.currentRepertorioId;
+}
+function ensureRepertorioBlocos(r){
+  return Array.isArray(r && r.blocos) ? r.blocos.slice() : [];
+}
+function salvarBlocos(r, blocos){
+  r.blocos = blocos.slice();
+  renderRepertorioPanel();
+  db.collection("repertorios").doc(r.id).update({blocos: blocos, atualizadoEm: new Date().toISOString()})
+    .catch(aoFalharEscrita("Não foi possível salvar a alteração."));
+}
+function renderRepertorioPanel(){
+  var r = currentRepertorio();
+  desarmarExcluirRepertorio();
+  renderRepertorioSelect();
+  if(!r){
+    document.getElementById("repertorio-blocos").innerHTML = '<div class="empty">Nenhum repertório selecionado. Crie um novo repertório para começar.</div>';
+    document.getElementById("repertorio-nome").value = "";
+    return;
+  }
+  document.getElementById("repertorio-select").value = r.id;
+  document.getElementById("repertorio-nome").value = r.nome||"";
+  var blocos = ensureRepertorioBlocos(r);
+  var html = blocos.map(function(bloco, bIdx){
+    var entries = bloco.cantos||[];
+    var itemsHtml = entries.map(function(raw, idx){
+      var parsed = parseMissaEntry(raw);
+      var numStr = parsed.numeroStr;
+      var s = getSong(Number(numStr));
+      var titulo = s ? s.titulo : "(canto removido nº "+numStr+")";
+      var origRoot = s ? rootLetter(s.tom) : null;
+      var effRoot = parsed.tom || origRoot;
+      var tomSelectHtml = s ? buildTomSelect(effRoot, "rp-tom-select", 'data-bloco="'+bIdx+'" data-idx="'+idx+'"') : "";
+      return '<div class="missa-song" data-bloco="'+bIdx+'" data-idx="'+idx+'">' +
+        '<span class="badge-num">'+esc(numStr)+'</span>' +
+        '<span class="titulo">'+esc(titulo)+'</span>' +
+        tomSelectHtml +
+        (s ? botaoOlho(s.numero, "Visualizar este canto") : "") +
+        '<div class="ord-btns">' +
+          '<button data-act="remove-canto" title="Remover" aria-label="Remover">✕</button>' +
+        '</div>' +
+      '</div>';
+    }).join("");
+    return '<div class="momento-block">' +
+      '<div class="momento-head">' +
+        '<input type="text" class="bloco-nome" data-bloco="'+bIdx+'" value="'+esc(bloco.nome||"")+'" placeholder="Nome do bloco">' +
+        '<div class="ord-btns">' +
+          '<button data-act="bloco-up" data-bloco="'+bIdx+'" title="Subir bloco">▲</button>' +
+          '<button data-act="bloco-down" data-bloco="'+bIdx+'" title="Descer bloco">▼</button>' +
+          '<button class="btn-ghost" data-act="bloco-remove" data-bloco="'+bIdx+'" title="Excluir bloco" aria-label="Excluir bloco">✕</button>' +
+        '</div>' +
+      '</div>' +
+      itemsHtml +
+      '<button class="add-momento-btn" data-act="add-canto" data-bloco="'+bIdx+'">+ Adicionar canto</button>' +
+    '</div>';
+  }).join("");
+  document.getElementById("repertorio-blocos").innerHTML = html ||
+    '<div class="empty">Nenhum bloco ainda. Clique em "+ Adicionar bloco" para começar.</div>';
+}
+document.getElementById("repertorio-blocos").addEventListener("click", function(e){
+  var r = currentRepertorio(); if(!r) return;
+  var blocos = ensureRepertorioBlocos(r);
+  var addCanto = e.target.closest('[data-act="add-canto"]');
+  if(addCanto){
+    var bIdx = Number(addCanto.getAttribute("data-bloco"));
+    openBlocoSongPicker(r.id, bIdx, blocos[bIdx] && blocos[bIdx].nome);
+    return;
+  }
+  var olho = e.target.closest("[data-ver]");
+  if(olho){ openSongDetail(Number(olho.getAttribute("data-ver")), {somenteLeitura:true}); return; }
+  var blocoUp = e.target.closest('[data-act="bloco-up"]');
+  if(blocoUp){ moveBloco(Number(blocoUp.getAttribute("data-bloco")), -1); return; }
+  var blocoDown = e.target.closest('[data-act="bloco-down"]');
+  if(blocoDown){ moveBloco(Number(blocoDown.getAttribute("data-bloco")), 1); return; }
+  var blocoRemove = e.target.closest('[data-act="bloco-remove"]');
+  if(blocoRemove){ excluirBloco(Number(blocoRemove.getAttribute("data-bloco"))); return; }
+  var removeCanto = e.target.closest('[data-act="remove-canto"]');
+  if(removeCanto){
+    var row = removeCanto.closest(".missa-song");
+    removeFromBloco(Number(row.getAttribute("data-bloco")), Number(row.getAttribute("data-idx")));
+  }
+});
+document.getElementById("repertorio-blocos").addEventListener("change", function(e){
+  var sel = e.target.closest(".rp-tom-select");
+  if(sel){ setSongTomInBloco(Number(sel.getAttribute("data-bloco")), Number(sel.getAttribute("data-idx")), sel.value); return; }
+});
+var blocoNomeTimer = null;
+document.getElementById("repertorio-blocos").addEventListener("input", function(e){
+  var input = e.target.closest(".bloco-nome");
+  if(!input) return;
+  var bIdx = Number(input.getAttribute("data-bloco"));
+  var val = input.value;
+  clearTimeout(blocoNomeTimer);
+  blocoNomeTimer = setTimeout(function(){ renomearBloco(bIdx, val); }, 500);
+});
+
+function addSongToBloco(repertorioId, blocoIdx, numero, tomTarget){
+  if(!repertorioId){ toast("Crie ou selecione um repertório primeiro."); return; }
+  var r = state.repertoriosById[repertorioId];
+  if(!r) return;
+  var blocos = ensureRepertorioBlocos(r);
+  var bloco = blocos[blocoIdx];
+  if(!bloco) return;
+  var song = getSong(numero);
+  var numStr = String(song ? song.numeroStr : numero);
+  var origRoot = song ? rootLetter(song.tom) : null;
+  var cantos = bloco.cantos||[];
+  var alreadyIn = cantos.some(function(raw){ return parseMissaEntry(raw).numeroStr === numStr; });
+  if(alreadyIn){ toast("Esse canto já está nesse bloco."); return; }
+  var entry = encodeMissaEntry(numStr, tomTarget, origRoot);
+  blocos[blocoIdx] = Object.assign({}, bloco, {cantos: cantos.concat([entry])});
+  salvarBlocos(r, blocos);
+  toast("Adicionado!");
+}
+function setSongTomInBloco(blocoIdx, idx, newRoot){
+  var r = currentRepertorio(); if(!r) return;
+  var blocos = ensureRepertorioBlocos(r);
+  var bloco = blocos[blocoIdx]; if(!bloco) return;
+  var arr = (bloco.cantos||[]).slice();
+  if(idx<0 || idx>=arr.length) return;
+  var parsed = parseMissaEntry(arr[idx]);
+  var song = getSong(Number(parsed.numeroStr));
+  var origRoot = song ? rootLetter(song.tom) : newRoot;
+  arr[idx] = encodeMissaEntry(parsed.numeroStr, newRoot, origRoot);
+  blocos[blocoIdx] = Object.assign({}, bloco, {cantos: arr});
+  salvarBlocos(r, blocos);
+}
+function removeFromBloco(blocoIdx, idx){
+  var r = currentRepertorio(); if(!r) return;
+  var blocos = ensureRepertorioBlocos(r);
+  var bloco = blocos[blocoIdx]; if(!bloco) return;
+  var arr = (bloco.cantos||[]).slice();
+  arr.splice(idx,1);
+  blocos[blocoIdx] = Object.assign({}, bloco, {cantos: arr});
+  salvarBlocos(r, blocos);
+}
+function novoBloco(){
+  var r = currentRepertorio(); if(!r){ toast("Crie ou selecione um repertório primeiro."); return; }
+  var blocos = ensureRepertorioBlocos(r);
+  blocos.push({nome: "Bloco " + (blocos.length+1), cantos: []});
+  salvarBlocos(r, blocos);
+}
+function moveBloco(idx, dir){
+  var r = currentRepertorio(); if(!r) return;
+  var blocos = ensureRepertorioBlocos(r);
+  var j = idx+dir;
+  if(j<0 || j>=blocos.length) return;
+  var tmp = blocos[idx]; blocos[idx]=blocos[j]; blocos[j]=tmp;
+  salvarBlocos(r, blocos);
+}
+function excluirBloco(idx){
+  var r = currentRepertorio(); if(!r) return;
+  var blocos = ensureRepertorioBlocos(r);
+  blocos.splice(idx,1);
+  salvarBlocos(r, blocos);
+}
+function renomearBloco(idx, nome){
+  var r = currentRepertorio(); if(!r) return;
+  var blocos = ensureRepertorioBlocos(r);
+  if(!blocos[idx]) return;
+  blocos[idx] = Object.assign({}, blocos[idx], {nome: nome});
+  r.blocos = blocos.slice();
+  db.collection("repertorios").doc(r.id).update({blocos: blocos, atualizadoEm: new Date().toISOString()})
+    .catch(aoFalharEscrita("Não foi possível salvar o nome do bloco."));
+}
+
+document.getElementById("repertorio-select").addEventListener("change", function(e){
+  state.currentRepertorioId = e.target.value;
+  try{ localStorage.setItem("cantos_repertorio_atual", state.currentRepertorioId); }catch(err){}
+  renderRepertorioPanel();
+  renderPrintPanel();
+});
+document.getElementById("repertorio-new-btn").addEventListener("click", function(){
+  var nome = "Repertório " + new Date().toLocaleDateString("pt-BR");
+  db.collection("repertorios").add({
+    nome: nome, blocos: [], criadoEm: new Date().toISOString(), atualizadoEm: new Date().toISOString()
+  }).then(function(ref){
+    state.currentRepertorioId = ref.id;
+    try{ localStorage.setItem("cantos_repertorio_atual", ref.id); }catch(err){}
+    toast("Novo repertório criado.");
+  }).catch(aoFalharEscrita("Não foi possível criar o repertório."));
+});
+document.getElementById("repertorio-novo-bloco-btn").addEventListener("click", novoBloco);
+var excluirRepertorioArmado = false, excluirRepertorioTimer = null;
+function desarmarExcluirRepertorio(){
+  excluirRepertorioArmado = false;
+  clearTimeout(excluirRepertorioTimer);
+  var b = document.getElementById("repertorio-delete-btn");
+  if(b){ b.textContent = "Excluir"; b.classList.remove("armado"); }
+}
+document.getElementById("repertorio-delete-btn").addEventListener("click", function(){
+  var r = currentRepertorio();
+  if(!r){ toast("Nenhum repertório selecionado."); return; }
+  if(!excluirRepertorioArmado){
+    excluirRepertorioArmado = true;
+    this.textContent = "Confirmar exclusão?";
+    this.classList.add("armado");
+    clearTimeout(excluirRepertorioTimer);
+    excluirRepertorioTimer = setTimeout(desarmarExcluirRepertorio, 5000);
+    return;
+  }
+  desarmarExcluirRepertorio();
+  db.collection("repertorios").doc(r.id).delete()
+    .then(function(){ toast("Repertório excluído."); })
+    .catch(aoFalharEscrita("Não foi possível excluir o repertório."));
+});
+var repertorioNomeTimer = null;
+document.getElementById("repertorio-nome").addEventListener("input", function(e){
+  var r = currentRepertorio(); if(!r) return;
+  clearTimeout(repertorioNomeTimer);
+  var val = e.target.value;
+  repertorioNomeTimer = setTimeout(function(){
+    db.collection("repertorios").doc(r.id).update({nome: val, atualizadoEm: new Date().toISOString()})
+      .catch(aoFalharEscrita("Não foi possível salvar o nome."));
+  }, 500);
 });
 
 /* ---------------- IMPRIMIR ---------------- */
@@ -1325,17 +1628,41 @@ function printLiturgiaHtml(it, cfg){
   '</div>';
 }
 function printSalmoHtml(sl){ return printLiturgiaHtml(sl, LITURGICOS.salmo); }
-function renderPrintPanel(){
+/* Ponto único que decide O QUE a aba Imprimir mostra: uma missa (MOMENTOS +
+   m.momentos + salmo/aclamação do dia) ou um repertório (blocos livres, sem
+   liturgia). renderPrintPanel() e montarPdf() só percorrem `secoes` — o
+   corpo dos dois nunca mais referencia MOMENTOS/m.momentos diretamente. */
+function resolverAlvoImpressao(){
+  if(state.printAlvo && state.printAlvo.tipo === "repertorio"){
+    var r = state.repertoriosById[state.printAlvo.id];
+    if(!r) return null;
+    var secoesRep = ensureRepertorioBlocos(r).map(function(bloco){
+      return {nome: bloco.nome || "Bloco", entries: bloco.cantos||[], liturgico: null, liturgicoCfg: null};
+    });
+    return {nome: r.nome, data: "", secoes: secoesRep};
+  }
   var m = currentMissa();
+  if(!m) return null;
+  var momentos = m.momentos||{};
+  var secoesMissa = MOMENTOS.map(function(mo){
+    return {
+      nome: mo.nome,
+      entries: momentos[mo.id]||[],
+      liturgico: LITURGICOS[mo.id] ? itemLiturgico(m, mo.id) : null,
+      liturgicoCfg: LITURGICOS[mo.id] || null
+    };
+  });
+  return {nome: m.nome, data: m.data, secoes: secoesMissa};
+}
+function renderPrintPanel(){
+  var alvoImpressao = resolverAlvoImpressao();
   var el = document.getElementById("print-preview");
-  if(!m){ el.innerHTML = '<div class="empty">Selecione ou crie uma missa na aba "Montar Missa".</div>'; return; }
+  if(!alvoImpressao){ el.innerHTML = '<div class="empty">Selecione ou crie uma missa em "Montar Missa" ou um repertório em "Repertório".</div>'; return; }
   var showCifra = document.getElementById("print-cifra").checked;
   var colsImpr = colunasImpressao();
-  var momentos = m.momentos||{};
-  var blocks = MOMENTOS.map(function(mo){
-    var entries = momentos[mo.id]||[];
-    var it = LITURGICOS[mo.id] ? itemLiturgico(m, mo.id) : null;
-    var salmoHtml = it ? printLiturgiaHtml(it, LITURGICOS[mo.id]) : "";
+  var blocks = alvoImpressao.secoes.map(function(sec){
+    var entries = sec.entries||[];
+    var salmoHtml = sec.liturgico ? printLiturgiaHtml(sec.liturgico, sec.liturgicoCfg) : "";
     if(!entries.length && !salmoHtml) return "";
     var songsHtml = entries.map(function(raw){
       var parsed = parseMissaEntry(raw);
@@ -1354,13 +1681,13 @@ function renderPrintPanel(){
         '<div class="ps-body">'+body+'</div>' +
       '</div>';
     }).join("");
-    return '<div class="print-momento"><h4>'+esc(mo.nome)+'</h4>'+salmoHtml+songsHtml+'</div>';
+    return '<div class="print-momento"><h4>'+esc(sec.nome)+'</h4>'+salmoHtml+songsHtml+'</div>';
   }).join("");
   if(!blocks.trim()){
-    el.innerHTML = '<div class="p-title">'+esc(m.nome||"Missa")+'</div><div class="p-date">'+esc(m.data||"")+'</div><div class="empty">Nenhum canto selecionado ainda.</div>';
+    el.innerHTML = '<div class="p-title">'+esc(alvoImpressao.nome||"")+'</div><div class="p-date">'+esc(alvoImpressao.data||"")+'</div><div class="empty">Nenhum canto selecionado ainda.</div>';
     return;
   }
-  el.innerHTML = '<div class="p-title">'+esc(m.nome||"Missa")+'</div><div class="p-date">'+esc(m.data||"")+'</div>' + blocks;
+  el.innerHTML = '<div class="p-title">'+esc(alvoImpressao.nome||"")+'</div><div class="p-date">'+esc(alvoImpressao.data||"")+'</div>' + blocks;
 }
 document.getElementById("print-cifra").addEventListener("change", renderPrintPanel);
 /* ---------------- PDF ----------------
@@ -1399,8 +1726,8 @@ function nomeArquivo(m){
   return (base || "missa") + ".pdf";
 }
 function montarPdf(){
-  var m = currentMissa();
-  if(!m) return null;
+  var alvoImpressao = resolverAlvoImpressao();
+  if(!alvoImpressao) return null;
   var showCifra = document.getElementById("print-cifra").checked;
   var cols = colunasImpressao();
   var MARGEM = 12, LARGURA = 210 - MARGEM * 2, ALTURA = 297;
@@ -1426,26 +1753,25 @@ function montarPdf(){
   }
   function respiro(mm){ y = Math.min(y + mm, ALTURA - MARGEM); }
 
-  escrever(m.nome || "Missa", {tamanho: 15, negrito: true});
-  if(m.data) escrever(dataBR(m.data), {tamanho: 9.5, cinza: true});
+  escrever(alvoImpressao.nome || "Missa", {tamanho: 15, negrito: true});
+  if(alvoImpressao.data) escrever(dataBR(alvoImpressao.data), {tamanho: 9.5, cinza: true});
   respiro(3);
 
-  var momentos = m.momentos || {};
   var escreveuAlgo = false;
-  MOMENTOS.forEach(function(mo){
-    var entries = momentos[mo.id] || [];
-    var it = LITURGICOS[mo.id] ? itemLiturgico(m, mo.id) : null;
+  alvoImpressao.secoes.forEach(function(sec){
+    var entries = sec.entries || [];
+    var it = sec.liturgico;
     if(!entries.length && !it) return;
     escreveuAlgo = true;
     cabe(linhaMm * 4);                       // não deixar cabeçalho órfão no pé da página
     respiro(2);
-    escrever(mo.nome.toUpperCase(), {tamanho: 10.5, negrito: true});
+    escrever(sec.nome.toUpperCase(), {tamanho: 10.5, negrito: true});
     doc.setDrawColor(200);
     doc.line(MARGEM, y + 1, 210 - MARGEM, y + 1);
     respiro(2.5);
 
     if(it){
-      escrever((it.referencia || LITURGICOS[mo.id].rotulo) + (it.liturgia ? "  ·  " + it.liturgia : ""),
+      escrever((it.referencia || sec.liturgicoCfg.rotulo) + (it.liturgia ? "  ·  " + it.liturgia : ""),
                {tamanho: corpoPt, mono: true, negrito: true});
       if(it.refrao){
         doc.splitTextToSize("R. " + it.refrao, LARGURA).forEach(function(l){
@@ -1500,8 +1826,8 @@ function montarPdf(){
 }
 document.getElementById("print-btn").addEventListener("click", function(){
   var btn = this;
-  var m = currentMissa();
-  if(!m){ toast("Selecione uma missa primeiro."); return; }
+  var alvoImpressao = resolverAlvoImpressao();
+  if(!alvoImpressao){ toast("Selecione uma missa ou repertório primeiro."); return; }
   btn.disabled = true;
   var rotulo = btn.textContent;
   btn.textContent = "Gerando…";
@@ -1510,7 +1836,7 @@ document.getElementById("print-btn").addEventListener("click", function(){
     var doc = montarPdf();
     if(!doc){ toast("Escolha ao menos um canto antes de gerar o PDF."); terminar(); return; }
     var blob = doc.output("blob");
-    var nome = nomeArquivo(m);
+    var nome = nomeArquivo(alvoImpressao);
     var useDownloads = (window.claude && window.claude.use)
       ? window.claude.use("downloads") : Promise.resolve(null);
     return useDownloads.then(function(dl){
@@ -2430,7 +2756,8 @@ function irParaAba(tab){
   document.querySelectorAll(".panel").forEach(function(p){ p.classList.remove("active"); });
   document.getElementById("panel-"+tab).classList.add("active");
   if(tab==="missa") renderMissaPanel();
-  if(tab==="imprimir") renderPrintPanel();
+  if(tab==="repertorio") renderRepertorioPanel();
+  if(tab==="imprimir"){ renderPrintSelect(); renderPrintPanel(); }
   if(tab==="adicionar") renderAdicionar();
 }
 document.getElementById("tabs").addEventListener("click", function(e){
@@ -2455,6 +2782,15 @@ function pickInitialMissa(){
   var sorted = sortedMissas();
   if(sorted.length){ state.currentMissaId = sorted[0].id; return; }
   state.currentMissaId = null;
+}
+function pickInitialRepertorio(){
+  if(state.currentRepertorioId && state.repertoriosById[state.currentRepertorioId]) return;
+  var saved = null;
+  try{ saved = localStorage.getItem("cantos_repertorio_atual"); }catch(e){}
+  if(saved && state.repertoriosById[saved]){ state.currentRepertorioId = saved; return; }
+  var sorted = sortedRepertorios();
+  if(sorted.length){ state.currentRepertorioId = sorted[0].id; return; }
+  state.currentRepertorioId = null;
 }
 
 function boot(){
@@ -2489,7 +2825,16 @@ function boot(){
       missas.forEach(function(m){ state.missasById[m.id]=m; });
       pickInitialMissa();
       if(state.currentTab==="missa") renderMissaPanel();
-      if(state.currentTab==="imprimir") renderPrintPanel();
+      if(state.currentTab==="imprimir"){ renderPrintSelect(); renderPrintPanel(); }
+    });
+    db.collection("repertorios").onSnapshot(function(snap){
+      var repertorios = snap.docs.map(function(d){ var v=Object.assign({},d.data()); v.id=d.id; return v; });
+      state.repertorios = repertorios;
+      state.repertoriosById = {};
+      repertorios.forEach(function(r){ state.repertoriosById[r.id]=r; });
+      pickInitialRepertorio();
+      if(state.currentTab==="repertorio") renderRepertorioPanel();
+      if(state.currentTab==="imprimir"){ renderPrintSelect(); renderPrintPanel(); }
     });
     db.collection("config").onSnapshot(function(snap){
       state.config = {};

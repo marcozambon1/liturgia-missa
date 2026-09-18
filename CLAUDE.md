@@ -12,13 +12,13 @@ Supabase é o principal.
 
 ## Estrutura
 
-    index.html            marcação (4 abas: Biblioteca, Montar Missa, Imprimir, Adicionar Música)
+    index.html            marcação (5 abas: Biblioteca, Montar Missa, Repertório, Imprimir, Adicionar Música)
     styles.css            todo o visual, tema claro/escuro por variáveis CSS
-    app.js                toda a lógica — ~2.550 linhas de JavaScript puro
+    app.js                toda a lógica — ~2.900 linhas de JavaScript puro
     supabase-adapter.js   traduz a interface do Firestore que o app.js fala para o Supabase
     config.js             credenciais do Supabase (versionado, ver "Credenciais")
     config.example.js     modelo para quem for apontar para outro projeto
-    schema.sql            cria as 7 tabelas, RLS e publicação Realtime
+    schema.sql            cria as 8 tabelas, RLS e publicação Realtime
     seed.py               carga inicial: envia dados/*.json para o banco
     atualizar_liturgia.py busca salmo e aclamação da CNBB e grava no Supabase
     assets/               catedral.png (fundo em traço, usado como mask-image)
@@ -68,7 +68,7 @@ para PostgREST + Realtime. Cada tabela é `id text primary key` + `data
 jsonb` + `updated_at` — o documento inteiro vive no `data`. **Toda tabela
 nova precisa desse mesmo formato**, ou o adapter não a enxerga.
 
-A escolha de origem está em `boot()` (app.js, linha 2460), nesta ordem:
+A escolha de origem está em `boot()` (app.js, linha 2796), nesta ordem:
 
 1. `window.supabaseDb` — posto lá pelo adapter (Supabase ou modo offline);
 2. `window.claude.use("db")` — o caminho antigo, quando roda como Artifact;
@@ -118,6 +118,16 @@ contornar isso continuam no código, mas a Action é o caminho principal.
   `acaodegracas`, `final`), cada uma um array **de strings**, não objetos:
   `"024"` (tom original) ou `"024|A"` (transposta). Decodifica com
   `parseMissaEntry()`, recodifica com `encodeMissaEntry()`.
+- **`repertorios`** — para apresentações avulsas (fora de missa), separado
+  de `missas`. `nome`, `criadoEm`, `atualizadoEm`, `blocos`: array de `{nome,
+  cantos}`, onde `cantos` é um array **de strings** no mesmo formato de
+  `momentos` (`"024"` / `"024|A"`, mesmo `parseMissaEntry`/`encodeMissaEntry`).
+  Sem liturgia do dia — blocos são só nome livre + lista de cantos. A aba
+  Imprimir mostra missas e repertórios juntos no mesmo `<select>` (valores
+  prefixados `"missa:ID"` / `"repertorio:ID"`); `resolverAlvoImpressao()`
+  (app.js) é o ponto único que decide qual dos dois vira `{titulo, data,
+  secoes}` para `renderPrintPanel()`/`montarPdf()` — quem mexer em impressão
+  mexe ali, não duplica a lógica para cada tipo.
 - **`salmos`** e **`aclamacoes`** — doc_id = data ISO, **mesma forma**:
   `data`, `liturgia`, `cor`, `referencia`, `refrao`, `estrofes` (array),
   `fonte`. Na aclamação o `refrao` é o "Aleluia" e `estrofes` tem um item
@@ -187,9 +197,24 @@ para outro banco, trocar os dois lugares.
 
 **8. Tabela nova só aparece em tempo real se entrar na publicação.** O
 `schema.sql` faz `alter publication supabase_realtime add table ...` para
-as sete. Sem isso a tabela carrega no `onSnapshot` inicial (via REST) e
-nunca mais atualiza sozinha — sintoma fácil de confundir com bug de
-interface.
+as oito (a mais recente é `repertorios`). Sem isso a tabela carrega no
+`onSnapshot` inicial (via REST) e nunca mais atualiza sozinha — sintoma
+fácil de confundir com bug de interface. **Atenção**: `schema.sql` é a
+fonte de verdade do que a tabela deveria ser, mas rodar esse script de novo
+no SQL Editor do Supabase é manual — se `repertorios` foi só adicionado ao
+arquivo e ninguém rodou o script contra o projeto real, a tabela não existe
+ainda no banco em produção e a aba Repertório vai falhar ao salvar
+(`console.error("Erro na busca da coleção repertorios")`), mesmo com o
+código correto.
+
+**9. O seletor de canto (`#picker-list`, usado em "+ Adicionar canto" e nos
+blocos de Repertório) já teve um corte fixo de 200 resultados** — não era
+limite do banco (o `state.songs` já carrega os ~432 inteiros via
+`onSnapshot`), era um `.slice(0, 200)` na renderização (`renderPickerList()`,
+app.js). Hoje ele renderiza em fatias de `PICKER_PAGE` (80) e carrega mais
+sozinho quando `#picker-list` é rolado perto do fim. **Não reintroduzir um
+corte fixo aqui** — se a lista parecer incompleta, o bug provavelmente
+voltou a ser um `.slice()` sem paginação, não falta de dado.
 
 ## Segurança do banco
 
@@ -211,8 +236,8 @@ elas voltam a valer se alguém republicar via `build.py`.
 - **`confirm()`, `alert()` e `prompt()` não funcionam** no iframe:
   `confirm()` devolve `false` sem mostrar nada e a ação protegida nunca
   acontece, calada. Por isso as confirmações são feitas em **dois cliques
-  no próprio botão** (`armarOuAgir()`, linha 2236) ou pelo overlay
-  `pedirConfirmacao()` (linha 795). `window.print()` também não funciona, e
+  no próprio botão** (`armarOuAgir()`, linha 2562) ou pelo overlay
+  `pedirConfirmacao()` (linha 799). `window.print()` também não funciona, e
   é por isso que o PDF é montado no app com jsPDF.
 - **Só `cdnjs.cloudflare.com` era aceito para script externo.** jsPDF 2.5.1
   e pdf.js 3.11.174 vêm de lá. O supabase-js veio depois, de jsDelivr — o
