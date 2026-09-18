@@ -337,7 +337,13 @@ button.group-title[aria-expanded="true"] .chev{transform:rotate(90deg);}
 .print-controls{display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:16px;}
 .print-controls select{width:auto; flex:1 1 220px;}
 .toggle-line{display:flex; align-items:center; gap:8px; font-size:.86rem;}
-.print-preview{background:#fff; color:#111; border-radius:10px; box-shadow:var(--shadow); padding:28px 30px; border:1px solid var(--linha);}
+/* A prévia reproduz a largura de uma folha A4 (colunasImpressao(), em app.js,
+   sempre calcula as colunas para essa largura, não para a tela) — em telas
+   estreitas o conteúdo é legitimamente mais largo que a viewport. Sem
+   overflow-x aqui, esse excesso vazava para .wrap/body e rolava a página
+   inteira de lado; com overflow-x:auto o excesso fica contido só nesta
+   caixa, como já acontece em .cifra (linha ~294). */
+.print-preview{background:#fff; color:#111; border-radius:10px; box-shadow:var(--shadow); padding:28px 30px; border:1px solid var(--linha); overflow-x:auto; max-width:100%;}
 .print-preview .p-title{font-family:var(--font-display); font-size:1.5rem; font-weight:700; margin-bottom:2px;}
 .print-preview .p-date{font-size:.85rem; color:#555; margin-bottom:20px;}
 .print-momento{margin-bottom:22px; break-inside:avoid;}
@@ -423,7 +429,7 @@ button.group-title[aria-expanded="true"] .chev{transform:rotate(90deg);}
   body *{visibility:hidden;}
   #print-root, #print-root *{visibility:visible;}
   #print-root{position:absolute; left:0; top:0; width:100%; padding:0; margin:0; background:#fff !important;}
-  .print-preview{box-shadow:none; border:none; padding:0;}
+  .print-preview{box-shadow:none; border:none; padding:0; overflow-x:visible;}
 }
 
 @media (max-width:560px){

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Livro de Cantos</title>
+<link rel="icon" type="image/png" href="assets/catedral.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -45,8 +46,8 @@
       <button class="btn btn-danger btn-sm" id="missa-delete-btn">Excluir</button>
     </div>
     <div class="missa-toolbar">
-      <div class="field"><label>Nome da missa</label><input type="text" id="missa-nome"></div>
-      <div class="field"><label>Data</label><input type="date" id="missa-data"></div>
+      <div class="field"><label for="missa-nome">Nome da missa</label><input type="text" id="missa-nome"></div>
+      <div class="field"><label for="missa-data">Data</label><input type="date" id="missa-data"></div>
     </div>
     <div id="missa-momentos"></div>
   </section>
@@ -91,7 +92,7 @@
         </div>
       </div>
       <div class="field campo-pdf">
-        <label>Carregar de um PDF</label>
+        <label for="add-pdf">Carregar de um PDF</label>
         <div class="pdf-linha">
           <label class="btn btn-ghost btn-sm" for="add-pdf">Escolher PDF…</label>
           <input type="file" id="add-pdf" accept="application/pdf,.pdf" hidden>
@@ -100,7 +101,7 @@
         <p class="hint" style="margin:6px 0 0;">O app lê o texto do PDF e coloca cada acorde na coluna onde ele está no papel — é assim que o livro do grupo foi importado. Serve para PDF com texto; digitalização (foto de página) não tem texto para ler.</p>
       </div>
       <div class="field">
-        <label for="add-texto">Letra com a cifra</label>
+        <label for="add-texto">Letra com a cifra *</label>
         <p class="hint" style="margin:0 0 6px;">Digite ou cole aqui o que vocês já têm — caderno, folha do ensaio, o site que o grupo usa. A cifra fica numa linha e a letra logo abaixo: são os espaços que colocam o acorde em cima da sílaba certa.</p>
         <textarea id="add-texto" class="mono-input" wrap="off" spellcheck="false" placeholder="D          G      A
 Aqui vai a letra, e o acorde fica em cima da sílaba"></textarea>
@@ -217,15 +218,15 @@ Aqui vai a letra, e o acorde fica em cima da sílaba"></textarea>
     </div>
     <div class="sheet-body" style="max-height:none;">
       <div class="field" style="margin-bottom:12px;">
-        <label>Referência bíblica</label>
+        <label for="edit-liturgia-ref">Referência bíblica</label>
         <input type="text" id="edit-liturgia-ref">
       </div>
       <div class="field" style="margin-bottom:12px;">
-        <label>Refrão</label>
+        <label for="edit-liturgia-refrao">Refrão</label>
         <input type="text" id="edit-liturgia-refrao">
       </div>
       <div class="field" style="margin-bottom:16px;">
-        <label id="edit-liturgia-texto-label">Versículo / Estrofes (uma por linha)</label>
+        <label id="edit-liturgia-texto-label" for="edit-liturgia-estrofes">Versículo / Estrofes (uma por linha)</label>
         <textarea id="edit-liturgia-estrofes" rows="4" style="width:100%;box-sizing:border-box;font-family:inherit;padding:8px;border-radius:6px;border:1px solid #ccc;"></textarea>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:10px;">
