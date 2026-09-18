@@ -343,7 +343,25 @@ button.group-title[aria-expanded="true"] .chev{transform:rotate(90deg);}
    overflow-x aqui, esse excesso vazava para .wrap/body e rolava a página
    inteira de lado; com overflow-x:auto o excesso fica contido só nesta
    caixa, como já acontece em .cifra (linha ~294). */
-.print-preview{background:#fff; color:#111; border-radius:10px; box-shadow:var(--shadow); padding:28px 30px; border:1px solid var(--linha); overflow-x:auto; max-width:100%;}
+/* Sombra nas bordas indicando rolagem lateral: quando a cifra não coube na
+   largura da tela (ver comentário acima) o usuário precisa perceber que dá
+   pra arrastar. É o truque de "scroll shadow" só com CSS: duas camadas de
+   gradiente "cobrem" (background-attachment:local, andam com o conteúdo) e
+   duas de sombra ficam fixas na borda (background-attachment:scroll); a
+   camada de cobertura, que é sólida, esconde a sombra do lado em que já se
+   rolou até o fim. Sem JS, sem depender de medir clientWidth. */
+.print-preview{
+  background-color:#fff; color:#111; border-radius:10px; box-shadow:var(--shadow); padding:28px 30px; border:1px solid var(--linha); overflow-x:auto; max-width:100%;
+  background-image:
+    linear-gradient(to right, #fff 30%, rgba(255,255,255,0)),
+    linear-gradient(to left, #fff 30%, rgba(255,255,255,0)),
+    radial-gradient(farthest-side at 0 50%, rgba(0,0,0,.28), rgba(0,0,0,0)),
+    radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,.28), rgba(0,0,0,0));
+  background-repeat:no-repeat;
+  background-position:left center, right center, left center, right center;
+  background-size:40px 100%, 40px 100%, 14px 100%, 14px 100%;
+  background-attachment:local, local, scroll, scroll;
+}
 .print-preview .p-title{font-family:var(--font-display); font-size:1.5rem; font-weight:700; margin-bottom:2px;}
 .print-preview .p-date{font-size:.85rem; color:#555; margin-bottom:20px;}
 .print-momento{margin-bottom:22px; break-inside:avoid;}
@@ -429,7 +447,7 @@ button.group-title[aria-expanded="true"] .chev{transform:rotate(90deg);}
   body *{visibility:hidden;}
   #print-root, #print-root *{visibility:visible;}
   #print-root{position:absolute; left:0; top:0; width:100%; padding:0; margin:0; background:#fff !important;}
-  .print-preview{box-shadow:none; border:none; padding:0; overflow-x:visible;}
+  .print-preview{box-shadow:none; border:none; padding:0; overflow-x:visible; background-image:none;}
 }
 
 @media (max-width:560px){
