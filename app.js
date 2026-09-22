@@ -1247,9 +1247,16 @@ function renderPrintSelect(){
   var parts = (sel.value||"").split(":");
   state.printAlvo = parts[0] ? {tipo: parts[0], id: parts.slice(1).join(":")} : null;
 }
+/* Mais recente entre criação e última alteração — usado para ordenar missas
+   e repertórios com o item mexido por último no topo, não só o mais novo. */
+function carimboOrdenacao(item){
+  var criado = item.criadoEm||"";
+  var atualizado = item.atualizadoEm||"";
+  return atualizado > criado ? atualizado : criado;
+}
 function sortedMissas(){
   return state.missas.slice().sort(function(a,b){
-    return (b.criadoEm||"").localeCompare(a.criadoEm||"");
+    return carimboOrdenacao(b).localeCompare(carimboOrdenacao(a));
   });
 }
 function atualizarBotaoSalvar(btnId, pendente){
@@ -1593,7 +1600,7 @@ document.getElementById("print-missa-select").addEventListener("change", functio
 function currentRepertorio(){ return state.repertoriosById[state.currentRepertorioId]; }
 function sortedRepertorios(){
   return state.repertorios.slice().sort(function(a,b){
-    return (b.criadoEm||"").localeCompare(a.criadoEm||"");
+    return carimboOrdenacao(b).localeCompare(carimboOrdenacao(a));
   });
 }
 function renderRepertorioSelect(){

@@ -153,6 +153,10 @@ contornar isso continuam no código, mas a Action é o caminho principal.
   (app.js) é o ponto único que decide qual dos dois vira `{titulo, data,
   secoes}` para `renderPrintPanel()`/`montarPdf()` — quem mexer em impressão
   mexe ali, não duplica a lógica para cada tipo.
+  `sortedMissas()`/`sortedRepertorios()` (app.js, via `carimboOrdenacao()`)
+  ordenam pelo mais recente entre `criadoEm` e `atualizadoEm`, não só pela
+  criação — apesar do nome, editar um item antigo o joga para o topo dos
+  três seletores (Montar Missa, Repertório e o agrupado da aba Imprimir).
 - **`salmos`** e **`aclamacoes`** — doc_id = data ISO, **mesma forma**:
   `data`, `liturgia`, `cor`, `referencia`, `refrao`, `estrofes` (array),
   `fonte`. Na aclamação o `refrao` é o "Aleluia" e `estrofes` tem um item
