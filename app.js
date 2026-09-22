@@ -482,6 +482,7 @@ function rowHtml(s, q){
     (state.libView==="ordem" ? '<span class="cat-tag">'+esc(s.categoria)+'</span>' : '') +
     '<span class="chip chip-tom">'+esc(s.tom)+'</span>' +
     '<button class="add-btn" data-add="'+s.numero+'" title="Adicionar à missa atual" aria-label="Adicionar">+</button>' +
+    botaoLapis(s.numero, s.titulo) +
     botaoLixo(s.numero, s.titulo) +
   '</div>';
 }
@@ -500,6 +501,12 @@ document.getElementById("lib-list").addEventListener("click", function(e){
   if(addBtn){
     e.stopPropagation();
     quickAddToMissa(Number(addBtn.getAttribute("data-add")));
+    return;
+  }
+  var lapis = e.target.closest("[data-editar-canto]");
+  if(lapis){
+    e.stopPropagation();
+    editarCanto(lapis.getAttribute("data-editar-canto"));
     return;
   }
   var lixo = e.target.closest("[data-excluir]");
@@ -898,9 +905,16 @@ var SVG_LIXO = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stro
   'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
   '<path d="M3.5 6.5h17M9 6.5V4h6v2.5M6.5 6.5l1 13.5h9l1-13.5"/>' +
   '<path d="M10.2 10.5v6M13.8 10.5v6"/></svg>';
+var SVG_LAPIS = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" ' +
+  'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+  '<path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3Z"/><path d="M14.5 7.5l2 2"/></svg>';
 function botaoLixo(numero, titulo){
   return '<button class="lixo-btn" data-excluir="'+numero+'" title="Excluir '+esc(titulo)+'" ' +
          'aria-label="Excluir '+esc(titulo)+'">'+SVG_LIXO+'</button>';
+}
+function botaoLapis(numero, titulo){
+  return '<button class="lapis-btn" data-editar-canto="'+numero+'" title="Editar '+esc(titulo)+'" ' +
+         'aria-label="Editar '+esc(titulo)+'">'+SVG_LAPIS+'</button>';
 }
 function botaoOlho(numero, titulo){
   return '<button class="olho-btn" data-ver="'+numero+'" title="'+esc(titulo)+'" ' +

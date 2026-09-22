@@ -239,6 +239,13 @@ button.group-title[aria-expanded="true"] .chev{transform:rotate(90deg);}
 }
 .lixo-btn:hover{background:var(--danger); color:#fff; border-color:var(--danger);}
 .lixo-btn svg{display:block; pointer-events:none;}
+.lapis-btn{
+  flex:0 0 auto; border:1px solid var(--linha); background:var(--paper); color:var(--ink-dim);
+  width:28px; height:26px; border-radius:6px; cursor:pointer; display:flex;
+  align-items:center; justify-content:center; padding:0;
+}
+.lapis-btn:hover{background:var(--verde); color:#fff; border-color:var(--verde);}
+.lapis-btn svg{display:block; pointer-events:none;}
 .sheet-confirm{max-width:440px;}
 .sheet-confirm .cf-msg{margin:0 0 4px; font-size:.92rem; line-height:1.6;}
 .sheet-confirm .cf-foot{justify-content:flex-end; gap:10px;}

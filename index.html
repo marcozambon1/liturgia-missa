@@ -7,7 +7,12 @@
 <link rel="icon" type="image/png" href="assets/catedral.png">
 <link rel="shortcut icon" href="favicon.ico">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="styles.css">
+<!-- O ?v= é o que garante que uma atualização chegue a quem já abriu o site
+     antes: o GitHub Pages manda Cache-Control: max-age=600 e, sem versão na
+     URL, o navegador continua rodando o app.js antigo junto com o index novo
+     (combinação que já fez o botão Salvar não responder e o PDF não baixar).
+     BUMPAR ESTA DATA A CADA PUBLICAÇÃO. -->
+<link rel="stylesheet" href="styles.css?v=20260922">
 </head>
 <body>
 <div class="catedral" aria-hidden="true"></div>
@@ -261,8 +266,8 @@ Aqui vai a letra, e o acorde fica em cima da sílaba"></textarea>
 <div class="toast" id="toast"></div>
 <!-- Supabase SDK e Adaptador -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
-<script src="supabase-adapter.js"></script>
-<script src="app.js"></script>
+<script src="config.js?v=20260922"></script>
+<script src="supabase-adapter.js?v=20260922"></script>
+<script src="app.js?v=20260922"></script>
 </body>
 </html>

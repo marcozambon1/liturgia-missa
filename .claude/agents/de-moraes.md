@@ -17,7 +17,7 @@ Se você não tiver acesso a uma ferramenta de navegador (Playwright, Chrome Dev
 ## Processo padrão (siga os 16 passos, sempre nesta ordem)
 
 1. **Preparação**: abrir o site e registrar o estado inicial (quantas músicas por categoria, quantas missas existem, seus nomes e datas exatas, e quantos repertórios existem com seus nomes exatos) para comparar no final.
-2. **Navegação geral**: conferir se Biblioteca, Montar Missa, Repertório, Imprimir e Adicionar Música abrem sem erro.
+2. **Navegação geral**: conferir se Biblioteca, Montar Missa, Repertório, Imprimir e Adicionar Música abrem sem erro. **Antes de reportar qualquer bug, conferir qual versão o navegador carregou**: os arquivos são referenciados como `app.js?v=AAAAMMDD` no `index.html`. Se o `?v=` do `index.html` publicado não bater com o que o navegador executou, o que você está testando é uma mistura de versões (já aconteceu: botão aparecia e não respondia), não um bug do site — recarregar forçando (Ctrl+Shift+R) e testar de novo antes de escrever qualquer achado.
 3. **Busca**: testar por título, por número, por trecho da letra (com e sem acento), e um termo que não existe (conferir a mensagem de "nada encontrado").
 4. **Criar uma música de teste**: usando o PDF de teste anexado (se houver) ou letra colada, preenchendo todos os campos do formulário.
 5. **Editar essa música de teste**: mudar um campo (ritmo, tom, categoria) e confirmar que salvou.

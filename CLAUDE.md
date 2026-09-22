@@ -250,6 +250,18 @@ primeiro, e `baixarBlob()` (Blob URL + `<a download>`) entrega o arquivo em
 navegador normal. Se o download voltar a falhar, o problema é a entrega, não a
 geração — conferir `baixarBlob()` antes de mexer em `montarPdf()`.
 
+**11. Publicar sem bumpar o `?v=` entrega meia atualização.** O GitHub Pages
+serve tudo com `Cache-Control: max-age=600`, e `index.html`, `app.js` e
+`styles.css` expiram cada um por conta. Sem versão na URL, dá para o navegador
+pegar o **index novo com o app.js velho** — foi exatamente isso que fez o botão
+"Salvar" aparecer e não responder (o HTML tinha o botão, o JS em cache não
+tinha o handler), o lápis de editar sumir e o PDF não baixar, tudo ao mesmo
+tempo, num site que estava correto no servidor. Por isso `index.html` referencia
+`styles.css?v=AAAAMMDD` e os três scripts com o mesmo `?v=`. **Toda publicação
+que mexa em `app.js`/`styles.css` tem que bumpar essa data**, senão o grupo
+continua rodando a versão anterior. Sintoma clássico: "no seu funciona, no meu
+não" — antes de caçar bug, conferir a versão que o navegador carregou.
+
 ## Segurança do banco
 
 O `schema.sql` cria, em todas as tabelas, política `for all using (true)
