@@ -146,6 +146,15 @@ label{font-size:.78rem; font-weight:600; color:var(--ink-dim); text-transform:up
 .btn-danger.armado{background:var(--danger); color:#fff; border-color:var(--danger);}
 .btn-sm{padding:5px 10px; font-size:.78rem;}
 .btn:disabled{opacity:.5; cursor:not-allowed;}
+/* botão Salvar com alteração pendente: pulsa de leve para não passar batido */
+.btn.pendente{animation:pulso-salvar 1.6s ease-in-out infinite;}
+@keyframes pulso-salvar{
+  0%,100%{box-shadow:0 0 0 0 rgba(123,50,67,.35);}
+  50%{box-shadow:0 0 0 5px rgba(123,50,67,0);}
+}
+@media (prefers-reduced-motion:reduce){
+  .btn.pendente{animation:none; outline:2px solid var(--verde); outline-offset:1px;}
+}
 .chip{
   display:inline-flex; align-items:center; font-size:.7rem; font-weight:700; text-transform:uppercase;
   letter-spacing:.04em; padding:2px 8px; border-radius:99px; background:var(--paper-3); color:var(--ink-dim);

@@ -110,14 +110,39 @@ contornar isso continuam no código, mas a Action é o caminho principal.
   (int), `numeroStr`, `titulo`, `tom`, `ritmo`, `categoria`, `corpo`
   (array de linhas, cifra e letra intercaladas), `origem` (`"livro"` |
   `"adicionada"`), `fonteUrl`, `criadoEm`, `atualizadoEm`.
-  Os 430 primeiros vieram do livro impresso do grupo; só os de `origem !==
-  "livro"` são editáveis (`ehDoLivro()`).
+  Os 430 primeiros vieram do livro impresso do grupo. **Todos são
+  editáveis**, mas canto com `origem === "livro"` (`ehDoLivro()`) pede
+  confirmação antes de abrir o formulário, e `salvarCanto()` **preserva a
+  `origem` na edição** — editar um canto do livro não pode transformá-lo em
+  `"adicionada"`, senão ele muda de lista e perde de onde veio.
 - **`missas`** — `nome`, `data`, `momentos`: objeto com uma chave por
   momento (`entrada`, `penitencial`, `gloria`, `salmo`, `aclamacao`,
   `ofertorio`, `santo`, `painosso`, `paz`, `cordeiro`, `comunhao`,
   `acaodegracas`, `final`), cada uma um array **de strings**, não objetos:
   `"024"` (tom original) ou `"024|A"` (transposta). Decodifica com
   `parseMissaEntry()`, recodifica com `encodeMissaEntry()`.
+- **Edição de missa e repertório não grava sozinha.** O site é usado por
+  várias pessoas ao mesmo tempo, então toda alteração nesses dois painéis vai
+  para uma **cópia de trabalho local** (`state.missaEdit` /
+  `state.repertorioEdit`) e só chega ao banco quando alguém clica em
+  **Salvar** (`salvarMissaEdit()` / `salvarRepertorioEdit()`). Consequências
+  para quem for mexer nesses painéis:
+  - `renderMissaPanel()`/`renderRepertorioPanel()` desenham de
+    `missaParaTela()`/`repertorioParaTela()` — a cópia local quando existe,
+    senão o que veio do banco. É isso que impede o `onSnapshot` do Realtime
+    de apagar da tela o que a pessoa ainda não salvou; **não voltar a desenhar
+    direto de `state.missasById`**.
+  - `baseAtualizadoEm` guarda o `atualizadoEm` de quando a edição começou.
+    No Salvar, `mudouNoBanco()` compara com o valor atual e, se outra pessoa
+    gravou nesse meio-tempo, pergunta antes de sobrescrever.
+  - Sair com pendência (trocar de aba, trocar a missa no `<select>`, criar
+    outra, fechar o navegador) passa por `guardarPendencia()` — que usa o
+    overlay `pedirConfirmacao()` com **três saídas** (salvar / sair sem
+    salvar / cancelar, via `rotuloSecundario`/`acaoSecundaria`). Fechar a aba
+    do navegador é a única exceção à regra de "nunca diálogo nativo": só o
+    `beforeunload` do próprio navegador consegue interceptar isso.
+  - **Criar e excluir continuam gravando na hora** — são ações discretas.
+  - A aba Imprimir mostra o que está **salvo**, não a cópia de trabalho.
 - **`repertorios`** — para apresentações avulsas (fora de missa), separado
   de `missas`. `nome`, `criadoEm`, `atualizadoEm`, `blocos`: array de `{nome,
   cantos}`, onde `cantos` é um array **de strings** no mesmo formato de
@@ -215,6 +240,15 @@ app.js). Hoje ele renderiza em fatias de `PICKER_PAGE` (80) e carrega mais
 sozinho quando `#picker-list` é rolado perto do fim. **Não reintroduzir um
 corte fixo aqui** — se a lista parecer incompleta, o bug provavelmente
 voltou a ser um `.slice()` sem paginação, não falta de dado.
+
+**10. O PDF não é entregue pelo `window.claude`.** `montarPdf()` sempre gerou
+o arquivo certo, mas a entrega dependia só de `window.claude.use("downloads")`
+— capability que **só existe dentro do iframe do Artifact**. No site publicado
+isso caía num "Este visualizador não permite salvar arquivos" e o PDF nunca
+chegava ao usuário. Hoje o caminho do Artifact continua sendo tentado
+primeiro, e `baixarBlob()` (Blob URL + `<a download>`) entrega o arquivo em
+navegador normal. Se o download voltar a falhar, o problema é a entrega, não a
+geração — conferir `baixarBlob()` antes de mexer em `montarPdf()`.
 
 ## Segurança do banco
 

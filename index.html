@@ -44,6 +44,7 @@
   <section class="panel" id="panel-missa">
     <div class="missa-select-row">
       <select id="missa-select"></select>
+      <button class="btn btn-primary" id="missa-salvar-btn" disabled>Salvar</button>
       <button class="btn" id="missa-new-btn">+ Nova missa</button>
       <button class="btn btn-danger btn-sm" id="missa-delete-btn">Excluir</button>
     </div>
@@ -57,6 +58,7 @@
   <section class="panel" id="panel-repertorio">
     <div class="missa-select-row">
       <select id="repertorio-select"></select>
+      <button class="btn btn-primary" id="repertorio-salvar-btn" disabled>Salvar</button>
       <button class="btn" id="repertorio-new-btn">+ Novo repertório</button>
       <button class="btn btn-danger btn-sm" id="repertorio-delete-btn">Excluir</button>
     </div>
@@ -223,6 +225,7 @@ Aqui vai a letra, e o acorde fica em cima da sílaba"></textarea>
     </div>
     <div class="sheet-foot cf-foot">
       <button class="btn btn-ghost" id="cf-cancelar">Cancelar</button>
+      <button class="btn btn-ghost" id="cf-secundario" hidden></button>
       <button class="btn btn-danger" id="cf-ok">Excluir</button>
     </div>
   </div>

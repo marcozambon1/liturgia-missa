@@ -92,6 +92,12 @@ var state = {
   openCats: {},      // categorias expandidas na visão "Por momento"
   currentMissaId: null,
   currentRepertorioId: null,
+  /* Cópia de trabalho local: toda edição de missa/repertório fica aqui até
+     alguém clicar em "Salvar". Existir = há alteração pendente. Guarda o
+     `atualizadoEm` de quando a edição começou (`baseAtualizadoEm`) para
+     detectar que outra pessoa gravou por cima nesse meio-tempo. */
+  missaEdit: null,       // {id, nome, data, momentos, baseAtualizadoEm}
+  repertorioEdit: null,  // {id, nome, blocos, baseAtualizadoEm}
   printAlvo: null,     // {tipo:"missa"|"repertorio", id} — o que a aba Imprimir mostra
   detailSong: null,
   detailTom: null,
@@ -796,6 +802,7 @@ function pedirSalmo(data){
    `confirm()` não funciona no iframe do artefato (devolve false calado), então
    toda pergunta de "tem certeza?" passa por este overlay. */
 var confirmAcao = null;
+var confirmAcaoSecundaria = null;
 function pedirConfirmacao(op){
   document.getElementById("cf-titulo").textContent = op.titulo || "Tem certeza?";
   document.getElementById("cf-msg").innerHTML = op.mensagem || "";
@@ -804,12 +811,23 @@ function pedirConfirmacao(op){
   }).join("");
   document.getElementById("cf-ok").textContent = op.rotulo || "Excluir";
   confirmAcao = op.acao || null;
+  /* Botão do meio, opcional: usado quando há três saídas em vez de duas
+     (ex.: salvar e sair / sair sem salvar / cancelar). */
+  var secundario = document.getElementById("cf-secundario");
+  confirmAcaoSecundaria = op.acaoSecundaria || null;
+  if(op.rotuloSecundario && op.acaoSecundaria){
+    secundario.textContent = op.rotuloSecundario;
+    secundario.hidden = false;
+  } else {
+    secundario.hidden = true;
+  }
   document.getElementById("confirm-overlay").classList.add("open");
   setTimeout(function(){ document.getElementById("cf-cancelar").focus(); }, 30);
 }
 function fecharConfirmacao(){
   document.getElementById("confirm-overlay").classList.remove("open");
   confirmAcao = null;
+  confirmAcaoSecundaria = null;
 }
 document.getElementById("cf-cancelar").addEventListener("click", fecharConfirmacao);
 document.getElementById("cf-x").addEventListener("click", fecharConfirmacao);
@@ -818,6 +836,11 @@ document.getElementById("confirm-overlay").addEventListener("click", function(e)
 });
 document.getElementById("cf-ok").addEventListener("click", function(){
   var acao = confirmAcao;
+  fecharConfirmacao();
+  if(acao) acao();
+});
+document.getElementById("cf-secundario").addEventListener("click", function(){
+  var acao = confirmAcaoSecundaria;
   fecharConfirmacao();
   if(acao) acao();
 });
@@ -902,7 +925,8 @@ function openSongDetail(numero, opcoes){
   document.getElementById("sd-categoria").textContent = s.categoria;
   document.getElementById("sd-tom").textContent = "Tom original: "+(s.tom||"—");
   document.getElementById("sd-ritmo").textContent = s.ritmo||"—";
-  document.getElementById("sd-editar").hidden = ehDoLivro(s);
+  // cantos do livro também podem ser editados (com confirmação em editarCanto)
+  document.getElementById("sd-editar").hidden = false;
   document.getElementById("sd-tom-select").innerHTML = TOM_OPTIONS.map(function(o){
     return '<option value="'+o.v+'"'+(o.v===origRoot?' selected':'')+'>'+esc(o.l)+'</option>';
   }).join("");
@@ -1017,6 +1041,162 @@ document.getElementById("picker-overlay").addEventListener("click", function(e){
   if(e.target.id === "picker-overlay") e.currentTarget.classList.remove("open");
 });
 
+/* ---------------- EDIÇÃO PENDENTE (missa e repertório) ----------------
+   O site é usado por várias pessoas ao mesmo tempo. Gravar a cada tecla
+   multiplicava escrita no banco e fazia uma pessoa sobrescrever a outra sem
+   ninguém perceber. Agora toda alteração de missa/repertório vai para uma
+   cópia de trabalho local e só chega ao banco quando alguém clica em Salvar.
+   Criar e excluir continuam imediatos — são ações discretas. */
+function missaEmEdicao(){
+  return (state.missaEdit && state.missaEdit.id === state.currentMissaId) ? state.missaEdit : null;
+}
+function repertorioEmEdicao(){
+  return (state.repertorioEdit && state.repertorioEdit.id === state.currentRepertorioId) ? state.repertorioEdit : null;
+}
+function temPendencia(){ return !!(state.missaEdit || state.repertorioEdit); }
+/* O que a tela deve desenhar: a cópia de trabalho quando existe, senão o que
+   veio do banco. É isso que impede o onSnapshot do Realtime de apagar o que a
+   pessoa está editando. */
+function missaParaTela(){ return missaEmEdicao() || currentMissa(); }
+function repertorioParaTela(){ return repertorioEmEdicao() || currentRepertorio(); }
+function iniciarEdicaoMissa(){
+  var emEdicao = missaEmEdicao();
+  if(emEdicao) return emEdicao;
+  var m = currentMissa();
+  if(!m) return null;
+  state.missaEdit = {
+    id: m.id,
+    nome: m.nome || "",
+    data: m.data || "",
+    momentos: ensureMissaObjExists(m),
+    baseAtualizadoEm: m.atualizadoEm || ""
+  };
+  return state.missaEdit;
+}
+function iniciarEdicaoRepertorio(){
+  var emEdicao = repertorioEmEdicao();
+  if(emEdicao) return emEdicao;
+  var r = currentRepertorio();
+  if(!r) return null;
+  state.repertorioEdit = {
+    id: r.id,
+    nome: r.nome || "",
+    blocos: ensureRepertorioBlocos(r),
+    baseAtualizadoEm: r.atualizadoEm || ""
+  };
+  return state.repertorioEdit;
+}
+function descartarEdicaoMissa(){ state.missaEdit = null; renderMissaPanel(); }
+function descartarEdicaoRepertorio(){ state.repertorioEdit = null; renderRepertorioPanel(); }
+/* Alguém gravou por cima enquanto esta pessoa editava? Compara o carimbo de
+   quando a edição começou com o que está no banco agora (o onSnapshot mantém
+   state.missasById fresco mesmo com edição pendente). */
+function mudouNoBanco(edit, salvo){
+  return !!(edit && salvo && (salvo.atualizadoEm || "") !== edit.baseAtualizadoEm);
+}
+function salvarMissaEdit(aoTerminar){
+  var edit = missaEmEdicao();
+  if(!edit){ if(aoTerminar) aoTerminar(); return; }
+  var salvo = state.missasById[edit.id];
+  if(!salvo){ toast("Esta missa não existe mais."); state.missaEdit = null; renderMissaPanel(); return; }
+  function gravar(){
+    db.collection("missas").doc(edit.id).update({
+      nome: edit.nome, data: edit.data, momentos: edit.momentos,
+      atualizadoEm: new Date().toISOString()
+    }).then(function(){
+      state.missaEdit = null;
+      renderMissaPanel();
+      renderPrintPanel();
+      toast("Missa salva!");
+      if(aoTerminar) aoTerminar();
+    }).catch(aoFalharEscrita("Não foi possível salvar a missa."));
+  }
+  if(mudouNoBanco(edit, salvo)){
+    pedirConfirmacao({
+      titulo: "Outra pessoa alterou esta missa",
+      mensagem: "A missa <strong>"+esc(salvo.nome||"sem nome")+"</strong> foi alterada no banco depois que você começou a editar.",
+      avisos: ["Salvar agora substitui a versão da outra pessoa pela sua. Descartar joga fora as suas alterações e traz a versão que está no banco."],
+      rotulo: "Salvar a minha versão",
+      acao: gravar,
+      rotuloSecundario: "Descartar as minhas",
+      acaoSecundaria: function(){
+        state.missaEdit = null;
+        renderMissaPanel();
+        toast("Alterações descartadas. Mostrando a versão do banco.");
+        if(aoTerminar) aoTerminar();
+      }
+    });
+    return;
+  }
+  gravar();
+}
+function salvarRepertorioEdit(aoTerminar){
+  var edit = repertorioEmEdicao();
+  if(!edit){ if(aoTerminar) aoTerminar(); return; }
+  var salvo = state.repertoriosById[edit.id];
+  if(!salvo){ toast("Este repertório não existe mais."); state.repertorioEdit = null; renderRepertorioPanel(); return; }
+  function gravar(){
+    db.collection("repertorios").doc(edit.id).update({
+      nome: edit.nome, blocos: edit.blocos,
+      atualizadoEm: new Date().toISOString()
+    }).then(function(){
+      state.repertorioEdit = null;
+      renderRepertorioPanel();
+      renderPrintPanel();
+      toast("Repertório salvo!");
+      if(aoTerminar) aoTerminar();
+    }).catch(aoFalharEscrita("Não foi possível salvar o repertório."));
+  }
+  if(mudouNoBanco(edit, salvo)){
+    pedirConfirmacao({
+      titulo: "Outra pessoa alterou este repertório",
+      mensagem: "O repertório <strong>"+esc(salvo.nome||"sem nome")+"</strong> foi alterado no banco depois que você começou a editar.",
+      avisos: ["Salvar agora substitui a versão da outra pessoa pela sua. Descartar joga fora as suas alterações e traz a versão que está no banco."],
+      rotulo: "Salvar a minha versão",
+      acao: gravar,
+      rotuloSecundario: "Descartar as minhas",
+      acaoSecundaria: function(){
+        state.repertorioEdit = null;
+        renderRepertorioPanel();
+        toast("Alterações descartadas. Mostrando a versão do banco.");
+        if(aoTerminar) aoTerminar();
+      }
+    });
+    return;
+  }
+  gravar();
+}
+/* Guarda de saída: chama `seguir()` quando puder sair; se houver pendência,
+   pergunta antes (salvar / sair sem salvar / cancelar). */
+function guardarPendencia(seguir){
+  if(!temPendencia()){ seguir(); return; }
+  var ehMissa = !!state.missaEdit;
+  pedirConfirmacao({
+    titulo: "Salvar antes de sair?",
+    mensagem: ehMissa
+      ? "Você alterou esta missa e ainda não salvou."
+      : "Você alterou este repertório e ainda não salvou.",
+    avisos: ["Se sair sem salvar, as alterações desta tela são perdidas."],
+    rotulo: "Salvar e sair",
+    acao: function(){
+      if(ehMissa) salvarMissaEdit(seguir); else salvarRepertorioEdit(seguir);
+    },
+    rotuloSecundario: "Sair sem salvar",
+    acaoSecundaria: function(){
+      state.missaEdit = null;
+      state.repertorioEdit = null;
+      seguir();
+    }
+  });
+}
+/* Fechar/recarregar a aba do navegador é o único caso em que não dá para usar
+   o overlay do app: o navegador só aceita o diálogo nativo dele. */
+window.addEventListener("beforeunload", function(e){
+  if(!temPendencia()) return;
+  e.preventDefault();
+  e.returnValue = "";
+});
+
 /* ---------------- MISSAS ---------------- */
 function currentMissa(){ return state.missasById[state.currentMissaId]; }
 
@@ -1058,10 +1238,20 @@ function sortedMissas(){
     return (b.criadoEm||"").localeCompare(a.criadoEm||"");
   });
 }
+function atualizarBotaoSalvar(btnId, pendente){
+  var btn = document.getElementById(btnId);
+  if(!btn) return;
+  btn.disabled = !pendente;
+  btn.classList.toggle("pendente", !!pendente);
+  btn.textContent = pendente ? "Salvar alterações" : "Salvar";
+}
 function renderMissaPanel(){
-  var m = currentMissa();
+  /* desenha a cópia de trabalho quando há edição pendente — é o que impede o
+     Realtime de apagar da tela o que a pessoa ainda não salvou */
+  var m = missaParaTela();
   desarmarExcluir();          // nunca deixar "Confirmar?" armado para outra missa
   renderMissaSelect();
+  atualizarBotaoSalvar("missa-salvar-btn", !!missaEmEdicao());
   if(!m){
     document.getElementById("missa-momentos").innerHTML = '<div class="empty">Nenhuma missa selecionada. Crie uma nova missa para começar.</div>';
     document.getElementById("missa-nome").value = "";
@@ -1243,87 +1433,78 @@ function ensureMissaObjExists(m){
   return momentos;
 }
 
+/* Todas as funções abaixo mexem SÓ na cópia de trabalho — quem grava no banco
+   é o botão Salvar (salvarMissaEdit). */
 function addSongToMoment(missaId, momentoId, numero, tomTarget){
   if(!missaId){ toast("Crie ou selecione uma missa primeiro."); return; }
-  var m = state.missasById[missaId];
-  if(!m) return;
+  if(missaId !== state.currentMissaId){ state.currentMissaId = missaId; }
+  var edit = iniciarEdicaoMissa();
+  if(!edit) return;
   var song = getSong(numero);
   var numStr = String(song ? song.numeroStr : numero);
   var origRoot = song ? rootLetter(song.tom) : null;
-  var alreadyIn = (m.momentos && m.momentos[momentoId] || []).some(function(raw){
+  var alreadyIn = (edit.momentos[momentoId] || []).some(function(raw){
     return parseMissaEntry(raw).numeroStr === numStr;
   });
   if(alreadyIn){ toast("Esse canto já está nesse momento."); return; }
-  var momentos = ensureMissaObjExists(m);
   var entry = encodeMissaEntry(numStr, tomTarget, origRoot);
-  momentos[momentoId] = momentos[momentoId].concat([entry]);
-
-  // Atualização otimista imediata para resposta instantânea na interface
-  m.momentos = Object.assign({}, momentos);
+  edit.momentos[momentoId] = (edit.momentos[momentoId] || []).concat([entry]);
   renderMissaPanel();
-
-  db.collection("missas").doc(missaId).update({momentos: momentos, atualizadoEm: new Date().toISOString()})
-    .then(function(){ toast("Adicionado!"); })
-    .catch(aoFalharEscrita("Não foi possível salvar."));
+  toast(state.currentTab === "missa"
+    ? "Adicionado. Clique em Salvar para gravar."
+    : "Adicionado à missa. Abra “Montar Missa” e clique em Salvar.");
 }
 function setSongTomInMoment(momentoId, idx, newRoot){
-  var m = currentMissa(); if(!m) return;
-  var momentos = ensureMissaObjExists(m);
-  var arr = momentos[momentoId].slice();
+  var edit = iniciarEdicaoMissa(); if(!edit) return;
+  var arr = (edit.momentos[momentoId] || []).slice();
   if(idx<0 || idx>=arr.length) return;
   var parsed = parseMissaEntry(arr[idx]);
   var song = getSong(Number(parsed.numeroStr));
   var origRoot = song ? rootLetter(song.tom) : newRoot;
   arr[idx] = encodeMissaEntry(parsed.numeroStr, newRoot, origRoot);
-  momentos[momentoId] = arr;
-  m.momentos = Object.assign({}, momentos);
+  edit.momentos[momentoId] = arr;
   renderMissaPanel();
-
-  db.collection("missas").doc(m.id).update({momentos: momentos, atualizadoEm: new Date().toISOString()})
-    .catch(aoFalharEscrita("Não foi possível salvar a alteração."));
 }
 function removeFromMoment(momentoId, idx){
-  var m = currentMissa(); if(!m) return;
-  var momentos = ensureMissaObjExists(m);
-  var arr = momentos[momentoId].slice();
+  var edit = iniciarEdicaoMissa(); if(!edit) return;
+  var arr = (edit.momentos[momentoId] || []).slice();
   arr.splice(idx,1);
-  momentos[momentoId] = arr;
-  m.momentos = Object.assign({}, momentos);
+  edit.momentos[momentoId] = arr;
   renderMissaPanel();
-
-  db.collection("missas").doc(m.id).update({momentos: momentos, atualizadoEm: new Date().toISOString()})
-    .catch(aoFalharEscrita("Não foi possível salvar a alteração."));
 }
 function moveInMoment(momentoId, idx, dir){
-  var m = currentMissa(); if(!m) return;
-  var momentos = ensureMissaObjExists(m);
-  var arr = momentos[momentoId].slice();
+  var edit = iniciarEdicaoMissa(); if(!edit) return;
+  var arr = (edit.momentos[momentoId] || []).slice();
   var j = idx+dir;
   if(j<0 || j>=arr.length) return;
   var tmp = arr[idx]; arr[idx]=arr[j]; arr[j]=tmp;
-  momentos[momentoId] = arr;
-  m.momentos = Object.assign({}, momentos);
+  edit.momentos[momentoId] = arr;
   renderMissaPanel();
-
-  db.collection("missas").doc(m.id).update({momentos: momentos, atualizadoEm: new Date().toISOString()})
-    .catch(aoFalharEscrita("Não foi possível salvar a alteração."));
 }
 
 document.getElementById("missa-select").addEventListener("change", function(e){
-  state.currentMissaId = e.target.value;
-  try{ localStorage.setItem("cantos_missa_atual", state.currentMissaId); }catch(err){}
-  renderMissaPanel();
-  renderPrintPanel();
+  var novoId = e.target.value;
+  var voltarPara = state.currentMissaId;
+  // trocar de missa também é "sair": pergunta antes de largar o que não foi salvo
+  guardarPendencia(function(){
+    state.currentMissaId = novoId;
+    try{ localStorage.setItem("cantos_missa_atual", state.currentMissaId); }catch(err){}
+    renderMissaPanel();
+    renderPrintPanel();
+  });
+  if(temPendencia()) e.target.value = voltarPara || "";
 });
 document.getElementById("missa-new-btn").addEventListener("click", function(){
-  var nome = "Missa " + new Date().toLocaleDateString("pt-BR");
-  db.collection("missas").add({
-    nome: nome, data: todayISO(), momentos: {}, criadoEm: new Date().toISOString(), atualizadoEm: new Date().toISOString()
-  }).then(function(ref){
-    state.currentMissaId = ref.id;
-    try{ localStorage.setItem("cantos_missa_atual", ref.id); }catch(err){}
-    toast("Nova missa criada.");
-  }).catch(aoFalharEscrita("Não foi possível criar a missa."));
+  guardarPendencia(function(){
+    var nome = "Missa " + new Date().toLocaleDateString("pt-BR");
+    db.collection("missas").add({
+      nome: nome, data: todayISO(), momentos: {}, criadoEm: new Date().toISOString(), atualizadoEm: new Date().toISOString()
+    }).then(function(ref){
+      state.currentMissaId = ref.id;
+      try{ localStorage.setItem("cantos_missa_atual", ref.id); }catch(err){}
+      toast("Nova missa criada.");
+    }).catch(aoFalharEscrita("Não foi possível criar a missa."));
+  });
 });
 /* O confirm() do navegador é bloqueado dentro do artefato: ele volta "não" sem
    mostrar nada, e a exclusão nunca acontecia. A confirmação passa a ser no próprio
@@ -1348,44 +1529,50 @@ document.getElementById("missa-delete-btn").addEventListener("click", function()
   }
   desarmarExcluir();
   db.collection("missas").doc(m.id).delete()
-    .then(function(){ toast("Missa excluída."); })
+    .then(function(){
+      if(state.missaEdit && state.missaEdit.id === m.id) state.missaEdit = null;
+      toast("Missa excluída.");
+    })
     .catch(aoFalharEscrita("Não foi possível excluir a missa."));
 });
-var nomeTimer=null;
+document.getElementById("missa-salvar-btn").addEventListener("click", function(){
+  salvarMissaEdit();
+});
 document.getElementById("missa-nome").addEventListener("input", function(e){
-  var m = currentMissa(); if(!m) return;
-  clearTimeout(nomeTimer);
-  var val = e.target.value;
-  nomeTimer = setTimeout(function(){
-    db.collection("missas").doc(m.id).update({nome: val, atualizadoEm: new Date().toISOString()})
-      .catch(aoFalharEscrita("Não foi possível salvar o nome."));
-  }, 500);
+  var edit = iniciarEdicaoMissa(); if(!edit) return;
+  edit.nome = e.target.value;
+  // sem re-render: redesenhar aqui jogaria o cursor do campo para o fim
+  atualizarBotaoSalvar("missa-salvar-btn", true);
 });
 document.getElementById("missa-data").addEventListener("change", function(e){
-  var m = currentMissa(); if(!m) return;
+  var edit = iniciarEdicaoMissa(); if(!edit) return;
   var novaData = e.target.value;
-  m.data = novaData;
-  db.collection("missas").doc(m.id).update({data: novaData, atualizadoEm: new Date().toISOString()})
-    .catch(aoFalharEscrita("Não foi possível salvar a data."));
+  edit.data = novaData;
   renderMissaPanel();
-  renderPrintPanel();
   if(novaData && (!state.salmos[novaData] || !state.aclamacoes[novaData])){
     buscarLiturgiaOnline(novaData);
   }
 });
 document.getElementById("print-missa-select").addEventListener("change", function(e){
-  var parts = (e.target.value||"").split(":");
-  state.printAlvo = parts[0] ? {tipo: parts[0], id: parts.slice(1).join(":")} : null;
-  if(state.printAlvo && state.printAlvo.tipo === "missa"){
-    state.currentMissaId = state.printAlvo.id;
-    try{ localStorage.setItem("cantos_missa_atual", state.currentMissaId); }catch(err){}
-    renderMissaPanel();
-  } else if(state.printAlvo && state.printAlvo.tipo === "repertorio"){
-    state.currentRepertorioId = state.printAlvo.id;
-    try{ localStorage.setItem("cantos_repertorio_atual", state.currentRepertorioId); }catch(err){}
-    renderRepertorioPanel();
-  }
-  renderPrintPanel();
+  var valor = e.target.value || "";
+  var anterior = state.printAlvo ? (state.printAlvo.tipo+":"+state.printAlvo.id) : "";
+  // escolher outra missa/repertório aqui troca a seleção dos outros painéis:
+  // se houver algo não salvo lá, pergunta antes de largar
+  guardarPendencia(function(){
+    var parts = valor.split(":");
+    state.printAlvo = parts[0] ? {tipo: parts[0], id: parts.slice(1).join(":")} : null;
+    if(state.printAlvo && state.printAlvo.tipo === "missa"){
+      state.currentMissaId = state.printAlvo.id;
+      try{ localStorage.setItem("cantos_missa_atual", state.currentMissaId); }catch(err){}
+      renderMissaPanel();
+    } else if(state.printAlvo && state.printAlvo.tipo === "repertorio"){
+      state.currentRepertorioId = state.printAlvo.id;
+      try{ localStorage.setItem("cantos_repertorio_atual", state.currentRepertorioId); }catch(err){}
+      renderRepertorioPanel();
+    }
+    renderPrintPanel();
+  });
+  if(temPendencia()) e.target.value = anterior;
 });
 
 /* ---------------- REPERTÓRIO ---------------- */
@@ -1407,16 +1594,19 @@ function renderRepertorioSelect(){
 function ensureRepertorioBlocos(r){
   return Array.isArray(r && r.blocos) ? r.blocos.slice() : [];
 }
-function salvarBlocos(r, blocos){
-  r.blocos = blocos.slice();
+/* Aplica os blocos na cópia de trabalho — quem grava é o botão Salvar
+   (salvarRepertorioEdit). */
+function aplicarBlocos(blocos){
+  var edit = iniciarEdicaoRepertorio();
+  if(!edit) return;
+  edit.blocos = blocos.slice();
   renderRepertorioPanel();
-  db.collection("repertorios").doc(r.id).update({blocos: blocos, atualizadoEm: new Date().toISOString()})
-    .catch(aoFalharEscrita("Não foi possível salvar a alteração."));
 }
 function renderRepertorioPanel(){
-  var r = currentRepertorio();
+  var r = repertorioParaTela();
   desarmarExcluirRepertorio();
   renderRepertorioSelect();
+  atualizarBotaoSalvar("repertorio-salvar-btn", !!repertorioEmEdicao());
   if(!r){
     document.getElementById("repertorio-blocos").innerHTML = '<div class="empty">Nenhum repertório selecionado. Crie um novo repertório para começar.</div>';
     document.getElementById("repertorio-nome").value = "";
@@ -1500,9 +1690,10 @@ document.getElementById("repertorio-blocos").addEventListener("input", function(
 
 function addSongToBloco(repertorioId, blocoIdx, numero, tomTarget){
   if(!repertorioId){ toast("Crie ou selecione um repertório primeiro."); return; }
-  var r = state.repertoriosById[repertorioId];
-  if(!r) return;
-  var blocos = ensureRepertorioBlocos(r);
+  if(repertorioId !== state.currentRepertorioId){ state.currentRepertorioId = repertorioId; }
+  var edit = iniciarEdicaoRepertorio();
+  if(!edit) return;
+  var blocos = edit.blocos.slice();
   var bloco = blocos[blocoIdx];
   if(!bloco) return;
   var song = getSong(numero);
@@ -1513,12 +1704,12 @@ function addSongToBloco(repertorioId, blocoIdx, numero, tomTarget){
   if(alreadyIn){ toast("Esse canto já está nesse bloco."); return; }
   var entry = encodeMissaEntry(numStr, tomTarget, origRoot);
   blocos[blocoIdx] = Object.assign({}, bloco, {cantos: cantos.concat([entry])});
-  salvarBlocos(r, blocos);
-  toast("Adicionado!");
+  aplicarBlocos(blocos);
+  toast("Adicionado. Clique em Salvar para gravar.");
 }
 function setSongTomInBloco(blocoIdx, idx, newRoot){
-  var r = currentRepertorio(); if(!r) return;
-  var blocos = ensureRepertorioBlocos(r);
+  var edit = iniciarEdicaoRepertorio(); if(!edit) return;
+  var blocos = edit.blocos.slice();
   var bloco = blocos[blocoIdx]; if(!bloco) return;
   var arr = (bloco.cantos||[]).slice();
   if(idx<0 || idx>=arr.length) return;
@@ -1527,63 +1718,75 @@ function setSongTomInBloco(blocoIdx, idx, newRoot){
   var origRoot = song ? rootLetter(song.tom) : newRoot;
   arr[idx] = encodeMissaEntry(parsed.numeroStr, newRoot, origRoot);
   blocos[blocoIdx] = Object.assign({}, bloco, {cantos: arr});
-  salvarBlocos(r, blocos);
+  aplicarBlocos(blocos);
 }
 function removeFromBloco(blocoIdx, idx){
-  var r = currentRepertorio(); if(!r) return;
-  var blocos = ensureRepertorioBlocos(r);
+  var edit = iniciarEdicaoRepertorio(); if(!edit) return;
+  var blocos = edit.blocos.slice();
   var bloco = blocos[blocoIdx]; if(!bloco) return;
   var arr = (bloco.cantos||[]).slice();
   arr.splice(idx,1);
   blocos[blocoIdx] = Object.assign({}, bloco, {cantos: arr});
-  salvarBlocos(r, blocos);
+  aplicarBlocos(blocos);
 }
 function novoBloco(){
-  var r = currentRepertorio(); if(!r){ toast("Crie ou selecione um repertório primeiro."); return; }
-  var blocos = ensureRepertorioBlocos(r);
+  var edit = iniciarEdicaoRepertorio();
+  if(!edit){ toast("Crie ou selecione um repertório primeiro."); return; }
+  var blocos = edit.blocos.slice();
   blocos.push({nome: "Bloco " + (blocos.length+1), cantos: []});
-  salvarBlocos(r, blocos);
+  aplicarBlocos(blocos);
 }
 function moveBloco(idx, dir){
-  var r = currentRepertorio(); if(!r) return;
-  var blocos = ensureRepertorioBlocos(r);
+  var edit = iniciarEdicaoRepertorio(); if(!edit) return;
+  var blocos = edit.blocos.slice();
   var j = idx+dir;
   if(j<0 || j>=blocos.length) return;
   var tmp = blocos[idx]; blocos[idx]=blocos[j]; blocos[j]=tmp;
-  salvarBlocos(r, blocos);
+  aplicarBlocos(blocos);
 }
 function excluirBloco(idx){
-  var r = currentRepertorio(); if(!r) return;
-  var blocos = ensureRepertorioBlocos(r);
+  var edit = iniciarEdicaoRepertorio(); if(!edit) return;
+  var blocos = edit.blocos.slice();
   blocos.splice(idx,1);
-  salvarBlocos(r, blocos);
+  aplicarBlocos(blocos);
 }
 function renomearBloco(idx, nome){
-  var r = currentRepertorio(); if(!r) return;
-  var blocos = ensureRepertorioBlocos(r);
+  var edit = iniciarEdicaoRepertorio(); if(!edit) return;
+  var blocos = edit.blocos.slice();
   if(!blocos[idx]) return;
   blocos[idx] = Object.assign({}, blocos[idx], {nome: nome});
-  r.blocos = blocos.slice();
-  db.collection("repertorios").doc(r.id).update({blocos: blocos, atualizadoEm: new Date().toISOString()})
-    .catch(aoFalharEscrita("Não foi possível salvar o nome do bloco."));
+  edit.blocos = blocos;
+  // sem re-render: o campo do nome do bloco está em foco enquanto digita
+  atualizarBotaoSalvar("repertorio-salvar-btn", true);
 }
 
 document.getElementById("repertorio-select").addEventListener("change", function(e){
-  state.currentRepertorioId = e.target.value;
-  try{ localStorage.setItem("cantos_repertorio_atual", state.currentRepertorioId); }catch(err){}
-  renderRepertorioPanel();
-  renderPrintPanel();
+  var novoId = e.target.value;
+  var voltarPara = state.currentRepertorioId;
+  guardarPendencia(function(){
+    state.currentRepertorioId = novoId;
+    try{ localStorage.setItem("cantos_repertorio_atual", state.currentRepertorioId); }catch(err){}
+    renderRepertorioPanel();
+    renderPrintPanel();
+  });
+  if(temPendencia()) e.target.value = voltarPara || "";
+});
+document.getElementById("repertorio-salvar-btn").addEventListener("click", function(){
+  salvarRepertorioEdit();
 });
 document.getElementById("repertorio-new-btn").addEventListener("click", function(){
-  var nome = "Repertório " + new Date().toLocaleDateString("pt-BR");
-  db.collection("repertorios").add({
-    nome: nome, blocos: [], criadoEm: new Date().toISOString(), atualizadoEm: new Date().toISOString()
-  }).then(function(ref){
-    state.currentRepertorioId = ref.id;
-    try{ localStorage.setItem("cantos_repertorio_atual", ref.id); }catch(err){}
-    toast("Novo repertório criado.");
-  }).catch(aoFalharEscrita("Não foi possível criar o repertório."));
+  guardarPendencia(function(){
+    var nome = "Repertório " + new Date().toLocaleDateString("pt-BR");
+    db.collection("repertorios").add({
+      nome: nome, blocos: [], criadoEm: new Date().toISOString(), atualizadoEm: new Date().toISOString()
+    }).then(function(ref){
+      state.currentRepertorioId = ref.id;
+      try{ localStorage.setItem("cantos_repertorio_atual", ref.id); }catch(err){}
+      toast("Novo repertório criado.");
+    }).catch(aoFalharEscrita("Não foi possível criar o repertório."));
+  });
 });
+
 document.getElementById("repertorio-novo-bloco-btn").addEventListener("click", novoBloco);
 var excluirRepertorioArmado = false, excluirRepertorioTimer = null;
 function desarmarExcluirRepertorio(){
@@ -1605,18 +1808,16 @@ document.getElementById("repertorio-delete-btn").addEventListener("click", funct
   }
   desarmarExcluirRepertorio();
   db.collection("repertorios").doc(r.id).delete()
-    .then(function(){ toast("Repertório excluído."); })
+    .then(function(){
+      if(state.repertorioEdit && state.repertorioEdit.id === r.id) state.repertorioEdit = null;
+      toast("Repertório excluído.");
+    })
     .catch(aoFalharEscrita("Não foi possível excluir o repertório."));
 });
-var repertorioNomeTimer = null;
 document.getElementById("repertorio-nome").addEventListener("input", function(e){
-  var r = currentRepertorio(); if(!r) return;
-  clearTimeout(repertorioNomeTimer);
-  var val = e.target.value;
-  repertorioNomeTimer = setTimeout(function(){
-    db.collection("repertorios").doc(r.id).update({nome: val, atualizadoEm: new Date().toISOString()})
-      .catch(aoFalharEscrita("Não foi possível salvar o nome."));
-  }, 500);
+  var edit = iniciarEdicaoRepertorio(); if(!edit) return;
+  edit.nome = e.target.value;
+  atualizarBotaoSalvar("repertorio-salvar-btn", true);
 });
 
 /* ---------------- IMPRIMIR ---------------- */
@@ -1724,6 +1925,18 @@ function nomeArquivo(m){
   base = base.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
              .replace(/[^a-zA-Z0-9 _-]/g, "").trim().replace(/\s+/g, "-").toLowerCase();
   return (base || "missa") + ".pdf";
+}
+/* Download pelo caminho normal do navegador, para quando a capability
+   `downloads` do Artifact n\u00e3o existir (\u00e9 o caso do site publicado). */
+function baixarBlob(blob, nome){
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = nome;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
 }
 function montarPdf(){
   var alvoImpressao = resolverAlvoImpressao();
@@ -1839,9 +2052,12 @@ document.getElementById("print-btn").addEventListener("click", function(){
     var nome = nomeArquivo(alvoImpressao);
     var useDownloads = (window.claude && window.claude.use)
       ? window.claude.use("downloads") : Promise.resolve(null);
-    return useDownloads.then(function(dl){
+    return useDownloads.catch(function(){ return null; }).then(function(dl){
       if(!dl){
-        toast("Este visualizador não permite salvar arquivos.");
+        // Fora do iframe do Artifact não existe a capability `downloads`:
+        // entrega o arquivo pelo caminho normal do navegador.
+        baixarBlob(blob, nome);
+        toast("PDF salvo: " + nome);
         terminar();
         return;
       }
@@ -2512,9 +2728,13 @@ function salvarCanto(){
   var numero = edicao ? edicao.numero : nextNumero();
   var numeroStr = edicao ? edicao.numeroStr : String(numero);
   var agora = new Date().toISOString();
+  /* Editar um canto do livro não pode transformá-lo em "adicionada": isso o
+     mudaria de lista e apagaria de onde ele veio. Origem só nasce
+     "adicionada" em canto novo. */
+  var origemAnterior = edicao ? (getSong(edicao.numero) || {}).origem : null;
   var doc = {
     numero: numero, numeroStr: numeroStr, titulo: f.titulo, categoria: f.categoria,
-    tom: f.tom, ritmo: f.ritmo, corpo: corpo, origem: "adicionada",
+    tom: f.tom, ritmo: f.ritmo, corpo: corpo, origem: origemAnterior || "adicionada",
     fonteUrl: f.fonteUrl, criadoEm: (edicao && edicao.criadoEm) || agora, atualizadoEm: agora
   };
   var docId = edicao ? edicao.id : pad3(numero);
@@ -2649,9 +2869,26 @@ function renderAdicionados(){
 function editarCanto(numero){
   var s = getSong(Number(numero));
   if(!s) return;
-  if(ehDoLivro(s)){ toast("Os cantos do livro não são editáveis por aqui."); return; }
+  /* Canto do livro pode ser editado, mas mexe no acervo importado do livro
+     impresso — por isso confirma antes, em vez de abrir direto. */
+  if(ehDoLivro(s)){
+    pedirConfirmacao({
+      titulo: "Editar um canto do livro?",
+      mensagem: "O canto <strong>"+esc(s.numeroStr)+" — "+esc(s.titulo)+"</strong> veio do livro impresso do grupo.",
+      avisos: ["Alterar este canto muda o acervo original para todo mundo. Para voltar ao texto do livro seria preciso reimportá-lo."],
+      rotulo: "Editar mesmo assim",
+      acao: function(){ abrirEdicaoDoCanto(s); }
+    });
+    return;
+  }
+  abrirEdicaoDoCanto(s);
+}
+function abrirEdicaoDoCanto(s){
   edicao = {id: s.id, numero: s.numero, numeroStr: s.numeroStr, criadoEm: s.criadoEm};
   rascunhoAtivo = null;
+  // trocar de aba ANTES de preencher: é o render da aba que monta as opções
+  // dos <select> de tom/categoria — com eles vazios, o valor não gruda
+  irParaAba("adicionar");
   preencherForm({titulo:s.titulo, categoria:s.categoria, tom:rootLetter(s.tom)||s.tom,
                  ritmo:s.ritmo, fonteUrl:s.fonteUrl, texto:(s.corpo||[]).join("\n")});
   renderAdicionar();
@@ -2749,6 +2986,12 @@ el("pedidos-list").addEventListener("click", function(e){
 
 /* ---------------- TABS ---------------- */
 function irParaAba(tab){
+  /* Sair de "Montar Missa"/"Repertório" com alteração pendente pergunta antes
+     (salvar / sair sem salvar / cancelar). */
+  if(tab !== state.currentTab && (state.currentTab === "missa" || state.currentTab === "repertorio") && temPendencia()){
+    guardarPendencia(function(){ irParaAba(tab); });
+    return;
+  }
   state.currentTab = tab;
   document.querySelectorAll(".tab-btn").forEach(function(x){
     x.classList.toggle("active", x.getAttribute("data-tab") === tab);
@@ -2769,7 +3012,8 @@ document.getElementById("sd-editar").addEventListener("click", function(){
   var s = state.detailSong;
   if(!s) return;
   fecharDetalhe();
-  irParaAba("adicionar");
+  // a troca de aba acontece dentro de abrirEdicaoDoCanto(), depois da
+  // confirmação — canto do livro pergunta antes de abrir o formulário
   editarCanto(s.numero);
 });
 
