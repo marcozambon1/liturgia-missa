@@ -37,7 +37,18 @@ texto corrido), antes de qualquer coisa:
      exige rodar SQL no Supabase (que é manual e o time não faz sozinho)?
      muda comportamento que as pessoas já usam?
    - **Dependência**: o que precisa vir antes do quê.
-4. **Aponte o que falta decidir.** Se um item embute uma decisão de produto
+4. **Toda tarefa nasce com documentação e teste junto.** Isto não é uma etapa
+   no fim, é parte da própria tarefa desde a organização do backlog. Para
+   cada uma, diga explicitamente:
+   - **O que muda no `CLAUDE.md`** — estrutura, modelo de dados, convenção
+     ou armadilha nova que a mudança cria. Se nada muda, diga "nada" e
+     justifique; não deixe em branco.
+   - **O que muda no roteiro de QA** (`.claude/agents/de-moraes.md`) — que
+     passo novo passa a existir, que passo existente muda de comportamento,
+     e o que o QA precisa reconferir daqui em diante por causa disto.
+   Uma tarefa sem essas duas linhas está mal organizada: volte e preencha
+   antes de levar o plano ao usuário.
+5. **Aponte o que falta decidir.** Se um item embute uma decisão de produto
    (o que fazer em caso de conflito, se algo avisa ou bloqueia, onde um botão
    novo deve aparecer), **pergunte ao usuário** em vez de escolher sozinho —
    é mais barato perguntar agora do que refazer depois.
@@ -46,9 +57,11 @@ texto corrido), antes de qualquer coisa:
 
 Monte um plano de execução curto e legível: as tarefas na ordem em que serão
 feitas, o porquê da ordem, o que cada uma muda, o que exige ação humana e o
-que você vai deixar de fora. **Apresente ao usuário e espere o OK antes de
-mandar qualquer agente mexer no código.** Se ele pedir mudanças, ajuste o
-plano e confirme de novo.
+que você vai deixar de fora. **Cada tarefa aparece no plano com as suas duas
+linhas de documentação e teste** (o que muda no `CLAUDE.md` e o que muda no
+roteiro do de-moraes) — o usuário precisa ver isso junto da tarefa, não
+depois. **Apresente ao usuário e espere o OK antes de mandar qualquer agente
+mexer no código.** Se ele pedir mudanças, ajuste o plano e confirme de novo.
 
 Exceção: correção óbvia e sem risco (texto de botão, erro de digitação) pode
 entrar no plano já marcada como "faço direto", mas ainda assim o plano
@@ -65,6 +78,9 @@ Para cada tarefa aprovada, nesta ordem:
 2. **Confira a entrega de verdade**: `git status`/`git log`/`git diff` para
    ver que o código mudou, e leia o que o alexandre-dev relatou como ficado
    de fora. Se ele disser que não conseguiu testar, trate como não entregue.
+   **Confira também que o `CLAUDE.md` e o roteiro do de-moraes saíram com as
+   alterações que o plano previa para aquela tarefa** — se o diff não as
+   tem, a tarefa não está pronta: mande de volta antes de pedir o commit.
 3. **Peça commit e push** (sem `--no-verify`, sem force-push) e **confirme o
    push** com `git log -1` e `git status` antes de seguir.
 4. **Ação humana pendente**: se a tarefa criou tabela/coluna nova, o
@@ -121,8 +137,10 @@ novidades, correções e mudanças no jeito de usar.
   Já houve três sintomas ao mesmo tempo — botão que não respondia, botão que
   não aparecia e PDF que não baixava — que eram um só problema de cache, com
   o código correto no servidor.
-- **Documentação faz parte de "pronto".** Funcionalidade nova pede
-  `CLAUDE.md` atualizado e o roteiro do `de-moraes.md` cobrindo o que passou
-  a existir. Não feche uma tarefa sem isso.
+- **Documentação e roteiro de QA não são etapa final, são parte da tarefa.**
+  Por isso entram já na Fase 1, aparecem no plano e são conferidos no diff
+  antes do commit. Uma funcionalidade que entrou sem o `CLAUDE.md` e o
+  roteiro do `de-moraes.md` atualizados volta a morder na rodada seguinte:
+  o QA testa uma coisa que não sabe que mudou.
 - **Mantenha o usuário informado a cada rodada**, em poucas frases, em vez de
   sumir até o fim do ciclo.
