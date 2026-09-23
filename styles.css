@@ -341,6 +341,34 @@ button.group-title[aria-expanded="true"] .chev{transform:rotate(90deg);}
 .missa-select-row{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:14px;}
 .missa-select-row select{width:auto; flex:1 1 200px;}
 
+/* ---------- combobox de busca (Montar Missa, Repertório e Imprimir) -------
+   Mesmo padrão visual/interativo do picker de cantos (#picker-search/-list),
+   mas inline — a lista suspensa fica sob o campo em vez de abrir um overlay
+   de tela cheia. O item selecionado continua morando no state; o campo é só
+   a representação visual dele. Ver CLAUDE.md. */
+.combo{position:relative; flex:1 1 200px;}
+.combo-input{width:100%;}
+.combo-list{
+  display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:25;
+  background:var(--card); border:1px solid var(--linha); border-radius:8px;
+  max-height:44vh; overflow-y:auto; box-shadow:var(--shadow);
+}
+.combo-list.open{display:block;}
+.combo-row{display:flex; align-items:baseline; gap:8px; padding:8px 10px; border-bottom:1px solid var(--linha); cursor:pointer; font-size:.86rem;}
+.combo-row:last-child{border-bottom:none;}
+.combo-row:hover{background:var(--paper-2);}
+.combo-row.is-current{background:var(--realce);}
+.combo-row .titulo{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.combo-row .data{color:var(--ink-dim); font-size:.78rem; white-space:nowrap;}
+.combo-empty{padding:10px; font-size:.84rem; color:var(--ink-dim);}
+/* cabeçalho de grupo ("Missas" / "Repertórios") na lista da aba Imprimir —
+   faz o papel do <optgroup> que o <select> agrupado tinha */
+.combo-grupo{
+  padding:6px 10px; font-size:.7rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:.04em; color:var(--ink-dim); background:var(--paper-2);
+  border-bottom:1px solid var(--linha); position:sticky; top:0;
+}
+
 /* ---------- picker overlay ---------- */
 .picker-list{max-height:44vh; overflow-y:auto; border:1px solid var(--linha); border-radius:8px; margin-top:10px;}
 .picker-row{display:flex; align-items:center; gap:8px; padding:8px 10px; border-bottom:1px solid var(--linha); cursor:pointer;}
@@ -352,6 +380,7 @@ button.group-title[aria-expanded="true"] .chev{transform:rotate(90deg);}
 /* ---------- imprimir ---------- */
 .print-controls{display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:16px;}
 .print-controls select{width:auto; flex:1 1 220px;}
+.print-controls .combo{flex:1 1 220px;}
 .toggle-line{display:flex; align-items:center; gap:8px; font-size:.86rem;}
 /* A prévia reproduz a largura de uma folha A4 (colunasImpressao(), em app.js,
    sempre calcula as colunas para essa largura, não para a tela) — em telas

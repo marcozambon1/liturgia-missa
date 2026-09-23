@@ -1214,38 +1214,197 @@ window.addEventListener("beforeunload", function(e){
 /* ---------------- MISSAS ---------------- */
 function currentMissa(){ return state.missasById[state.currentMissaId]; }
 
-function renderMissaSelect(){
-  var sel = document.getElementById("missa-select");
-  var opts = sortedMissas().map(function(m){
-    return '<option value="'+m.id+'">'+esc(m.nome||"(sem nome)")+(m.data? " — "+m.data:"")+'</option>';
-  }).join("");
-  var prev = sel.value;
-  sel.innerHTML = opts || '<option value="">Nenhuma missa</option>';
-  if(state.missasById[prev]) sel.value = prev; else if(state.currentMissaId) sel.value = state.currentMissaId;
-}
-function renderPrintSelect(){
-  var sel = document.getElementById("print-missa-select");
-  var prev = sel.value;
-  var missaOpts = sortedMissas().map(function(m){
-    return '<option value="missa:'+m.id+'">'+esc(m.nome||"(sem nome)")+(m.data? " — "+m.data:"")+'</option>';
-  }).join("");
-  var repOpts = sortedRepertorios().map(function(r){
-    return '<option value="repertorio:'+r.id+'">'+esc(r.nome||"(sem nome)")+'</option>';
-  }).join("");
-  var html = "";
-  if(missaOpts) html += '<optgroup label="Missas">'+missaOpts+'</optgroup>';
-  if(repOpts) html += '<optgroup label="Repertórios">'+repOpts+'</optgroup>';
-  sel.innerHTML = html || '<option value="">Nenhuma missa ou repertório</option>';
-  var alvoAtual = state.printAlvo ? (state.printAlvo.tipo+":"+state.printAlvo.id) : "";
-  if(alvoAtual && html.indexOf('value="'+alvoAtual+'"') !== -1){
-    sel.value = alvoAtual;
-  } else if(html.indexOf('value="'+prev+'"') !== -1){
-    sel.value = prev;
-  } else if(state.currentMissaId && html.indexOf('value="missa:'+state.currentMissaId+'"') !== -1){
-    sel.value = "missa:"+state.currentMissaId;
+/* ---------------- COMBOBOX DE BUSCA ----------------
+   Substitui os antigos <select> de escolher missa/repertório (Montar Missa,
+   Repertório e Imprimir) por um campo de texto com lista suspensa filtrável —
+   dá para achar pelo nome ou pela data em vez de rolar uma lista que só
+   cresce. A ordem da lista é a de sortedMissas()/sortedRepertorios(), ou
+   seja, o mexido por último no topo.
+
+   REGRA QUE NÃO PODE SER QUEBRADA: o item selecionado continua morando no
+   state (state.currentMissaId, state.currentRepertorioId, state.printAlvo).
+   O combobox é só a representação visual dele — o texto digitado no campo
+   NUNCA é "o valor atual". Quem escolhe grava no state e manda re-renderizar;
+   o campo é resincronizado a partir do state. Guardar a seleção no próprio
+   campo faria a tela mostrar um item e o app apontar para outro, que é
+   exatamente o bug que a aba Imprimir já teve.
+
+   cfg:
+     prefixo   — ids no HTML: <prefixo>-combo, -combo-input, -combo-list
+     itens()   — [{valor, titulo, sub, termos, grupo}] já na ordem de exibição
+     atual()   — o valor selecionado hoje, lido do state
+     escolher(valor) — aplica a escolha (é quem chama guardarPendencia())
+     vazioTxt  — texto quando nada casa com a busca */
+function criarCombo(cfg){
+  var combo = document.getElementById(cfg.prefixo+"-combo");
+  var input = document.getElementById(cfg.prefixo+"-combo-input");
+  var lista = document.getElementById(cfg.prefixo+"-combo-list");
+  if(!combo || !input || !lista) return null;
+  var filtro = "";
+
+  function aberto(){ return lista.classList.contains("open"); }
+  function rotulo(it){ return it.titulo + (it.sub? " — "+it.sub : ""); }
+  function combina(it, qNorm){
+    if(!qNorm) return true;
+    var termos = [it.titulo, it.sub].concat(it.termos||[]);
+    for(var i=0;i<termos.length;i++){
+      if(termos[i] && normBusca(termos[i]).indexOf(qNorm) !== -1) return true;
+    }
+    return false;
   }
-  var parts = (sel.value||"").split(":");
+  function desenharLista(){
+    if(!aberto()) return;              // fechada: nada para redesenhar
+    var qNorm = normBusca(filtro);
+    var atual = cfg.atual();
+    var itens = cfg.itens().filter(function(it){ return combina(it, qNorm); });
+    if(!itens.length){
+      lista.innerHTML = '<div class="combo-empty">'+esc(cfg.vazioTxt||"Nada encontrado")+
+        (filtro? ' para “'+esc(filtro)+'”':"")+'.</div>';
+      return;
+    }
+    var grupo = null, html = "";
+    itens.forEach(function(it){
+      if(it.grupo && it.grupo !== grupo){
+        grupo = it.grupo;
+        html += '<div class="combo-grupo">'+esc(grupo)+'</div>';
+      }
+      html += '<div class="combo-row'+(it.valor===atual? " is-current":"")+'" data-valor="'+esc(it.valor)+'">' +
+        '<span class="titulo">'+esc(it.titulo)+'</span>' +
+        (it.sub? '<span class="data">'+esc(it.sub)+'</span>' : "") +
+      '</div>';
+    });
+    lista.innerHTML = html;
+  }
+  /* Reflete o state no campo — só com a lista fechada, para nunca apagar o
+     que a pessoa está digitando enquanto filtra. */
+  function sincronizar(){
+    if(aberto()) return;
+    var atual = cfg.atual(), achado = null;
+    cfg.itens().forEach(function(it){ if(it.valor === atual) achado = it; });
+    input.value = achado ? rotulo(achado) : "";
+  }
+  function abrir(){ lista.classList.add("open"); desenharLista(); }
+  function fechar(){ lista.classList.remove("open"); sincronizar(); }
+
+  input.addEventListener("focus", function(){ filtro = ""; abrir(); this.select(); });
+  input.addEventListener("input", function(e){ filtro = e.target.value; abrir(); });
+  input.addEventListener("keydown", function(e){
+    if(e.key === "Escape"){ fechar(); this.blur(); }
+  });
+  lista.addEventListener("click", function(e){
+    var row = e.target.closest(".combo-row");
+    if(!row) return;
+    var valor = row.getAttribute("data-valor");
+    /* Fecha e resincroniza ANTES de saber a decisão do overlay de pendência:
+       se a pessoa cancelar, o state não muda e o campo já está — e continua —
+       mostrando o que estava selecionado antes do clique. Quando ela confirma,
+       o re-render do painel chama render() aqui e o campo acerta sozinho. */
+    fechar();
+    if(valor === cfg.atual()) return;
+    cfg.escolher(valor);
+    sincronizar();
+  });
+  /* Fecha ao clicar fora — só mexe em algo se a lista estiver aberta. Senão,
+     qualquer clique na página (ex.: "+ Nova missa", que troca o state antes do
+     re-render terminar) resincronizaria o campo com um item que o resto do
+     painel ainda não está mostrando. */
+  document.addEventListener("click", function(e){
+    if(!aberto()) return;
+    if(!combo.contains(e.target)) fechar();
+  });
+
+  return {
+    render: function(){ desenharLista(); sincronizar(); },
+    fechar: fechar
+  };
+}
+
+var comboMissa = criarCombo({
+  prefixo: "missa",
+  vazioTxt: "Nenhuma missa encontrada",
+  itens: function(){
+    return sortedMissas().map(function(m){
+      return {
+        valor: m.id,
+        titulo: m.nome||"(sem nome)",
+        sub: m.data ? dataBR(m.data) : "",
+        termos: [m.data]            // casa também com a data ISO (aaaa-mm-dd)
+      };
+    });
+  },
+  atual: function(){ return state.currentMissaId; },
+  /* Escolher outra missa é "sair" da atual: mesma guarda de pendência que o
+     <select> antigo usava. */
+  escolher: function(novoId){
+    guardarPendencia(function(){
+      state.currentMissaId = novoId;
+      try{ localStorage.setItem("cantos_missa_atual", state.currentMissaId); }catch(err){}
+      renderMissaPanel();
+      renderPrintPanel();
+    });
+  }
+});
+function renderMissaSelect(){ if(comboMissa) comboMissa.render(); }
+
+/* O combobox da aba Imprimir lista missas e repertórios juntos, com o tipo no
+   valor ("missa:ID" / "repertorio:ID"), como o <select> agrupado fazia. */
+var comboPrint = criarCombo({
+  prefixo: "print",
+  vazioTxt: "Nenhuma missa ou repertório encontrado",
+  itens: function(){
+    var itens = sortedMissas().map(function(m){
+      return {
+        valor: "missa:"+m.id,
+        titulo: m.nome||"(sem nome)",
+        sub: m.data ? dataBR(m.data) : "",
+        termos: [m.data],
+        grupo: "Missas"
+      };
+    });
+    return itens.concat(sortedRepertorios().map(function(r){
+      return {valor: "repertorio:"+r.id, titulo: r.nome||"(sem nome)", sub: "", grupo: "Repertórios"};
+    }));
+  },
+  atual: function(){ return state.printAlvo ? (state.printAlvo.tipo+":"+state.printAlvo.id) : ""; },
+  escolher: function(valor){
+    /* Escolher aqui troca a seleção dos outros painéis: se houver algo não
+       salvo lá, pergunta antes de largar. */
+    guardarPendencia(function(){
+      aplicarAlvoImpressao(valor);
+      if(state.printAlvo && state.printAlvo.tipo === "missa"){
+        state.currentMissaId = state.printAlvo.id;
+        try{ localStorage.setItem("cantos_missa_atual", state.currentMissaId); }catch(err){}
+        renderMissaPanel();
+      } else if(state.printAlvo && state.printAlvo.tipo === "repertorio"){
+        state.currentRepertorioId = state.printAlvo.id;
+        try{ localStorage.setItem("cantos_repertorio_atual", state.currentRepertorioId); }catch(err){}
+        renderRepertorioPanel();
+      }
+      renderPrintPanel();
+    });
+  }
+});
+function aplicarAlvoImpressao(valor){
+  var parts = (valor||"").split(":");
   state.printAlvo = parts[0] ? {tipo: parts[0], id: parts.slice(1).join(":")} : null;
+}
+/* Mantém state.printAlvo apontando para algo que ainda existe e reflete isso
+   no campo. Sem <select> não há mais "valor anterior do elemento": a única
+   memória é o próprio state, e o fallback é a missa aberta em Montar Missa. */
+function renderPrintSelect(){
+  var alvo = state.printAlvo;
+  var existe = alvo && (alvo.tipo === "missa" ? !!state.missasById[alvo.id] : !!state.repertoriosById[alvo.id]);
+  if(!existe){
+    if(state.currentMissaId && state.missasById[state.currentMissaId]){
+      aplicarAlvoImpressao("missa:"+state.currentMissaId);
+    } else {
+      var primeiraMissa = sortedMissas()[0], primeiroRep = sortedRepertorios()[0];
+      if(primeiraMissa) aplicarAlvoImpressao("missa:"+primeiraMissa.id);
+      else if(primeiroRep) aplicarAlvoImpressao("repertorio:"+primeiroRep.id);
+      else state.printAlvo = null;
+    }
+  }
+  if(comboPrint) comboPrint.render();
 }
 /* Mais recente entre criação e última alteração — usado para ordenar missas
    e repertórios com o item mexido por último no topo, não só o mais novo. */
@@ -1279,7 +1438,6 @@ function renderMissaPanel(){
     document.getElementById("missa-data").value = "";
     return;
   }
-  document.getElementById("missa-select").value = m.id;
   document.getElementById("missa-nome").value = m.nome||"";
   document.getElementById("missa-data").value = m.data||"";
   var momentos = m.momentos||{};
@@ -1503,18 +1661,9 @@ function moveInMoment(momentoId, idx, dir){
   renderMissaPanel();
 }
 
-document.getElementById("missa-select").addEventListener("change", function(e){
-  var novoId = e.target.value;
-  var voltarPara = state.currentMissaId;
-  // trocar de missa também é "sair": pergunta antes de largar o que não foi salvo
-  guardarPendencia(function(){
-    state.currentMissaId = novoId;
-    try{ localStorage.setItem("cantos_missa_atual", state.currentMissaId); }catch(err){}
-    renderMissaPanel();
-    renderPrintPanel();
-  });
-  if(temPendencia()) e.target.value = voltarPara || "";
-});
+/* A escolha de missa agora é o combobox `comboMissa` (criado junto com os
+   outros em "COMBOBOX DE BUSCA"); ele já leva a guarda de pendência dentro do
+   seu `escolher`, então aqui não sobra listener de <select>. */
 document.getElementById("missa-new-btn").addEventListener("click", function(){
   guardarPendencia(function(){
     var nome = "Missa " + new Date().toLocaleDateString("pt-BR");
@@ -1523,6 +1672,11 @@ document.getElementById("missa-new-btn").addEventListener("click", function(){
     }).then(function(ref){
       state.currentMissaId = ref.id;
       try{ localStorage.setItem("cantos_missa_atual", ref.id); }catch(err){}
+      // sem isso, state.currentMissaId muda mas nome/data/momentos e o campo
+      // de busca continuam mostrando a missa anterior até algum outro evento
+      // forçar um render — exatamente a dessincronia que o combobox não pode ter.
+      renderMissaPanel();
+      renderPrintPanel();
       toast("Nova missa criada.");
     }).catch(aoFalharEscrita("Não foi possível criar a missa."));
   });
@@ -1574,27 +1728,8 @@ document.getElementById("missa-data").addEventListener("change", function(e){
     buscarLiturgiaOnline(novaData);
   }
 });
-document.getElementById("print-missa-select").addEventListener("change", function(e){
-  var valor = e.target.value || "";
-  var anterior = state.printAlvo ? (state.printAlvo.tipo+":"+state.printAlvo.id) : "";
-  // escolher outra missa/repertório aqui troca a seleção dos outros painéis:
-  // se houver algo não salvo lá, pergunta antes de largar
-  guardarPendencia(function(){
-    var parts = valor.split(":");
-    state.printAlvo = parts[0] ? {tipo: parts[0], id: parts.slice(1).join(":")} : null;
-    if(state.printAlvo && state.printAlvo.tipo === "missa"){
-      state.currentMissaId = state.printAlvo.id;
-      try{ localStorage.setItem("cantos_missa_atual", state.currentMissaId); }catch(err){}
-      renderMissaPanel();
-    } else if(state.printAlvo && state.printAlvo.tipo === "repertorio"){
-      state.currentRepertorioId = state.printAlvo.id;
-      try{ localStorage.setItem("cantos_repertorio_atual", state.currentRepertorioId); }catch(err){}
-      renderRepertorioPanel();
-    }
-    renderPrintPanel();
-  });
-  if(temPendencia()) e.target.value = anterior;
-});
+/* A escolha do que imprimir é o combobox `comboPrint` — ver "COMBOBOX DE
+   BUSCA". A guarda de pendência mora no `escolher` dele. */
 
 /* ---------------- REPERTÓRIO ---------------- */
 function currentRepertorio(){ return state.repertoriosById[state.currentRepertorioId]; }
@@ -1603,15 +1738,27 @@ function sortedRepertorios(){
     return carimboOrdenacao(b).localeCompare(carimboOrdenacao(a));
   });
 }
-function renderRepertorioSelect(){
-  var sel = document.getElementById("repertorio-select");
-  var prev = sel.value;
-  var opts = sortedRepertorios().map(function(r){
-    return '<option value="'+r.id+'">'+esc(r.nome||"(sem nome)")+'</option>';
-  }).join("");
-  sel.innerHTML = opts || '<option value="">Nenhum repertório</option>';
-  if(state.repertoriosById[prev]) sel.value = prev; else if(state.currentRepertorioId) sel.value = state.currentRepertorioId;
-}
+/* Repertório não tem data — a busca é só por nome. Fora isso, mesmo combobox
+   das outras duas abas; ver "COMBOBOX DE BUSCA". */
+var comboRepertorio = criarCombo({
+  prefixo: "repertorio",
+  vazioTxt: "Nenhum repertório encontrado",
+  itens: function(){
+    return sortedRepertorios().map(function(r){
+      return {valor: r.id, titulo: r.nome||"(sem nome)", sub: ""};
+    });
+  },
+  atual: function(){ return state.currentRepertorioId; },
+  escolher: function(novoId){
+    guardarPendencia(function(){
+      state.currentRepertorioId = novoId;
+      try{ localStorage.setItem("cantos_repertorio_atual", state.currentRepertorioId); }catch(err){}
+      renderRepertorioPanel();
+      renderPrintPanel();
+    });
+  }
+});
+function renderRepertorioSelect(){ if(comboRepertorio) comboRepertorio.render(); }
 function ensureRepertorioBlocos(r){
   return Array.isArray(r && r.blocos) ? r.blocos.slice() : [];
 }
@@ -1633,7 +1780,6 @@ function renderRepertorioPanel(){
     document.getElementById("repertorio-nome").value = "";
     return;
   }
-  document.getElementById("repertorio-select").value = r.id;
   document.getElementById("repertorio-nome").value = r.nome||"";
   var blocos = ensureRepertorioBlocos(r);
   var html = blocos.map(function(bloco, bIdx){
@@ -1781,17 +1927,6 @@ function renomearBloco(idx, nome){
   atualizarBotaoSalvar("repertorio-salvar-btn", true);
 }
 
-document.getElementById("repertorio-select").addEventListener("change", function(e){
-  var novoId = e.target.value;
-  var voltarPara = state.currentRepertorioId;
-  guardarPendencia(function(){
-    state.currentRepertorioId = novoId;
-    try{ localStorage.setItem("cantos_repertorio_atual", state.currentRepertorioId); }catch(err){}
-    renderRepertorioPanel();
-    renderPrintPanel();
-  });
-  if(temPendencia()) e.target.value = voltarPara || "";
-});
 document.getElementById("repertorio-salvar-btn").addEventListener("click", function(){
   salvarRepertorioEdit();
 });

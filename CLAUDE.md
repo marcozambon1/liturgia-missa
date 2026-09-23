@@ -135,7 +135,7 @@ contornar isso continuam no código, mas a Action é o caminho principal.
   - `baseAtualizadoEm` guarda o `atualizadoEm` de quando a edição começou.
     No Salvar, `mudouNoBanco()` compara com o valor atual e, se outra pessoa
     gravou nesse meio-tempo, pergunta antes de sobrescrever.
-  - Sair com pendência (trocar de aba, trocar a missa no `<select>`, criar
+  - Sair com pendência (trocar de aba, trocar a missa no combobox, criar
     outra, fechar o navegador) passa por `guardarPendencia()` — que usa o
     overlay `pedirConfirmacao()` com **três saídas** (salvar / sair sem
     salvar / cancelar, via `rotuloSecundario`/`acaoSecundaria`). Fechar a aba
@@ -148,7 +148,7 @@ contornar isso continuam no código, mas a Action é o caminho principal.
   cantos}`, onde `cantos` é um array **de strings** no mesmo formato de
   `momentos` (`"024"` / `"024|A"`, mesmo `parseMissaEntry`/`encodeMissaEntry`).
   Sem liturgia do dia — blocos são só nome livre + lista de cantos. A aba
-  Imprimir mostra missas e repertórios juntos no mesmo `<select>` (valores
+  Imprimir mostra missas e repertórios juntos no mesmo seletor (valores
   prefixados `"missa:ID"` / `"repertorio:ID"`); `resolverAlvoImpressao()`
   (app.js) é o ponto único que decide qual dos dois vira `{titulo, data,
   secoes}` para `renderPrintPanel()`/`montarPdf()` — quem mexer em impressão
@@ -157,6 +157,17 @@ contornar isso continuam no código, mas a Action é o caminho principal.
   ordenam pelo mais recente entre `criadoEm` e `atualizadoEm`, não só pela
   criação — apesar do nome, editar um item antigo o joga para o topo dos
   três seletores (Montar Missa, Repertório e o agrupado da aba Imprimir).
+- **Escolher missa/repertório é um combobox, não um `<select>`.** Os três
+  seletores (Montar Missa, Repertório e o agrupado de Imprimir) são um campo
+  de texto + lista suspensa filtrável, montados pela mesma fábrica
+  `criarCombo(cfg)` (app.js, seção "COMBOBOX DE BUSCA") e instanciados em
+  `comboMissa`, `comboRepertorio` e `comboPrint`. Dá para achar pelo nome ou,
+  nas missas, pela data — digitando em `dd/mm/aaaa` ou em `aaaa-mm-dd`, porque
+  o item leva a data BR no `sub` e a ISO em `termos`. A lista sai na ordem de
+  `sortedMissas()`/`sortedRepertorios()`, ou seja, o mexido por último no topo,
+  e a de Imprimir ainda agrupa em "Missas" e "Repertórios" (`cfg.itens()`
+  devolve o campo `grupo`; era o `<optgroup>` de antes).
+  Para mexer nisso, ver também a armadilha nº 12.
 - **`salmos`** e **`aclamacoes`** — doc_id = data ISO, **mesma forma**:
   `data`, `liturgia`, `cor`, `referencia`, `refrao`, `estrofes` (array),
   `fonte`. Na aclamação o `refrao` é o "Aleluia" e `estrofes` tem um item
@@ -265,6 +276,40 @@ tempo, num site que estava correto no servidor. Por isso `index.html` referencia
 que mexa em `app.js`/`styles.css` tem que bumpar essa data**, senão o grupo
 continua rodando a versão anterior. Sintoma clássico: "no seu funciona, no meu
 não" — antes de caçar bug, conferir a versão que o navegador carregou.
+
+**12. No combobox, o texto do campo NUNCA é o valor selecionado.** Quem manda
+continua sendo o `state` (`state.currentMissaId`, `state.currentRepertorioId`,
+`state.printAlvo`); o campo é só a representação visual dele, resincronizada
+por `sincronizar()` a partir do `state`. Guardar a seleção no próprio campo faz
+a tela mostrar um item e o app apontar para outro — é a forma exata do bug que
+a aba Imprimir já teve, o nome no seletor não batendo com o que era impresso.
+Três consequências práticas de `criarCombo()`:
+- **Só resincronizar com a lista fechada.** Com a lista aberta o campo é a
+  busca que a pessoa está digitando; escrever nele ali apaga o que ela digitou.
+- **O clique é tratado antes da decisão do overlay.** `escolher()` chama
+  `guardarPendencia()`, que pode abrir o overlay de três saídas e só rodar o
+  `seguir()` depois. Por isso o combobox fecha e resincroniza **antes**: se a
+  pessoa cancelar, o `state` não muda e o campo já está — e continua — mostrando
+  o item anterior. Quando ela confirma, o `renderMissaPanel()`/
+  `renderRepertorioPanel()` do `seguir()` chama o `render()` do combobox e o
+  campo acerta sozinho.
+- **O "fechar ao clicar fora" só age com a lista aberta.** Sem essa guarda,
+  qualquer clique na página (o "+ Nova missa", que troca o `state` antes do
+  re-render terminar) resincronizaria o campo com um item que o resto do painel
+  ainda não está mostrando.
+Sem `<select>` não existe mais "valor anterior do elemento": `renderPrintSelect()`
+valida `state.printAlvo` contra o que ainda existe e, se sumiu, cai na missa
+aberta em Montar Missa, depois na primeira da lista.
+
+**13. O modo offline é um mock com dois limites conhecidos.**
+`ativarModoOffline()` (supabase-adapter.js) guarda **um só callback por
+coleção** (`callbacks[colName] = cb`), então registrar um `onSnapshot` próprio
+durante um teste **derruba o listener do app** e a tela para de atualizar — não
+é bug do app. E o `add()` gera id com `'doc_' + Date.now().toString(36)`, então
+dois `add()` no mesmo milissegundo se sobrescrevem: para semear dados de teste,
+usar `doc(id).set()` com id explícito. O `memoria` inicial também não tem
+`repertorios` (a coleção é criada sob demanda) e `dados/repertorios.json` não
+entra na carga.
 
 ## Segurança do banco
 
