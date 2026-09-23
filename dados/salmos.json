@@ -1,5 +1,132 @@
 [
  {
+  "cor": "Branco",
+  "criadoEm": "2026-09-17T18:15:45.743Z",
+  "data": "2026-01-03",
+  "estrofes": [
+   "– Cantai ao Senhor Deus um canto novo, porque ele fez prodígios! Sua mão e o seu braço forte e santo alcançaram-lhe a vitória.",
+   "– Os confins do universo contemplaram a salvação do nosso Deus. Aclamai o Senhor Deus, ó terra inteira, alegrai-vos e exultai!",
+   "– Cantai salmos ao Senhor ao som da harpa e da cítara suave! Aclamai, com os clarins e as trombetas, ao Senhor, o nosso rei!"
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "Sábado do Tempo do Natal antes da Epifania",
+  "referencia": "Sl 97(98)",
+  "refrao": "Os confins do universo contemplaram a salvação do nosso Deus.",
+  "id": "2026-01-03"
+ },
+ {
+  "cor": "Verde",
+  "criadoEm": "2026-09-18T13:26:07.255Z",
+  "data": "2026-01-18",
+  "estrofes": [
+   "– Esperando, esperei no Senhor, e, inclinando-se, ouviu meu clamor. Canto novo ele pôs em meus lábios, um poema em louvor ao Senhor.",
+   "– Sacrifício e oblação não quisestes, mas abristes, Senhor, meus ouvidos. Não pedistes ofertas nem vítimas, holocaustos por nossos pecados.",
+   "– E então eu vos disse: “Eis que venho!” Sobre mim está escrito no livro: “Com prazer faço a vossa vontade, guardo em meu coração vossa lei!”",
+   "– Boas-novas de vossa justiça anunciei numa grande assembleia; vós sabeis: não fechei os meus lábios!"
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "2º Domingo do Tempo Comum",
+  "referencia": "Sl 39(40)",
+  "refrao": "Eu disse: eis que venho, Senhor, com prazer faço a vossa vontade!",
+  "id": "2026-01-18"
+ },
+ {
+  "cor": "Verde",
+  "criadoEm": "2026-09-17T18:16:26.909Z",
+  "data": "2026-01-27",
+  "estrofes": [
+   "“Ó portas, levantai vossos frontões! Elevai-vos bem mais alto, antigas portas, a fim de que o Rei da glória possa entrar!”",
+   "Dizei-nos: “Quem é este Rei da glória?” “É o Senhor, o valoroso, o onipotente, o Senhor, o poderoso nas batalhas!”",
+   "“Ó portas, levantai vossos frontões! Elevai-vos bem mais alto, antigas portas, a fim de que o Rei da glória possa entrar!",
+   "Dizei-nos: “Quem é este Rei da glória?” “O Rei da glória é o Senhor onipotente, o Rei da glória é o Senhor Deus do universo"
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "3ª feira da 3ª Semana do Tempo Comum",
+  "referencia": "Sl 23",
+  "refrao": "Dizei-nos: “Quem é este Rei da glória?” “É o Senhor, o valoroso, o grandioso!”",
+  "id": "2026-01-27"
+ },
+ {
+  "cor": "Branco",
+  "criadoEm": "2026-09-17T18:16:08.638Z",
+  "data": "2026-01-31",
+  "estrofes": [
+   "– Criai em mim um coração que seja puro, dai-me de novo um espírito decidido. Ó Senhor, não me afasteis de vossa face nem retireis de mim o vosso Santo Espírito!",
+   "– Dai-me de novo a alegria de ser salvo e confirmai-me com espírito generoso! Ensinarei vosso caminho aos pecadores, e para vós se voltarão os transviados.",
+   "– Da morte como pena, libertai-me, e minha língua exaltará vossa justiça! Abri meus lábios, ó Senhor, para cantar, e minha boca anunciará vosso louvor!"
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "São João Bosco, presbítero, Memória",
+  "referencia": "Sl 50(51)",
+  "refrao": "Criai em mim um coração que seja puro!",
+  "id": "2026-01-31"
+ },
+ {
+  "cor": "Roxo",
+  "criadoEm": "2026-09-17T19:01:32.571Z",
+  "data": "2026-03-17",
+  "estrofes": [
+   "O Senhor para nós é refúgio e vigor, sempre pronto, mostrou-se um socorro na angústia; assim não tememos, se a terra estremece, se os montes desabam, caindo nos mares.",
+   "Os braços de um rio vêm trazer alegria à Cidade de Deus, à morada do Altíssimo. Quem a pode abalar? Deus está no seu meio! Já bem antes da aurora, ele vem ajudá-la.",
+   "Conosco está o Senhor do universo! O nosso refúgio é o Deus de Jacó! Vinde ver, contemplai os prodígios de Deus e a obra estupenda que fez no universo."
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "3ª feira da 4ª Semana da Quaresma",
+  "referencia": "Sl 45",
+  "refrao": "Conosco está o Senhor do Universo! O nosso refúgio é o Deus de Jacó.",
+  "id": "2026-03-17"
+ },
+ {
+  "cor": "Branco",
+  "criadoEm": "2026-09-17T18:43:33.106Z",
+  "data": "2026-05-31",
+  "estrofes": [
+   "– Sede bendito, Senhor Deus de nossos pais.",
+   "– Sede bendito, nome santo e glorioso.",
+   "– No templo santo onde refulge a vossa glória.",
+   "– E em vosso trono de poder vitorioso.",
+   "– Sede bendito, que sondais as profundezas.",
+   "– E superior aos querubins vos assentais.",
+   "– Sede bendito no celeste firmamento."
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "Santíssima Trindade, Solenidade",
+  "referencia": "Dn 3",
+  "refrao": "A vós louvor, honra e glória eternamente!",
+  "id": "2026-05-31"
+ },
+ {
+  "cor": "Verde",
+  "criadoEm": "2026-09-17T19:28:54.822Z",
+  "data": "2026-09-01",
+  "estrofes": [
+   "– Misericórdia e piedade é o Senhor, ele é amor, é paciência, é compaixão. O Senhor é muito bom para com todos, sua ternura abraça toda criatura.",
+   "– Que vossas obras, ó Senhor, vos glorifiquem, e os vossos santos com louvores vos bendigam! Narrem a glória e o esplendor do vosso reino e saibam proclamar vosso poder!",
+   "– Para espalhar vossos prodígios entre os homens e o fulgor de vosso reino esplendoroso. O vosso reino é um reino para sempre, vosso poder, de geração em geração.",
+   "– O Senhor é amor fiel em sua palavra, é santidade em toda obra que ele faz. Ele sustenta todo aquele que vacila e levanta todo aquele que tombou."
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "3ª feira da 22ª Semana do Tempo Comum",
+  "referencia": "Sl 144(145)",
+  "refrao": "É justo o Senhor em seus caminhos.",
+  "id": "2026-09-01"
+ },
+ {
+  "cor": "Branco",
+  "criadoEm": "2026-09-17T18:40:54.164Z",
+  "data": "2026-09-03",
+  "estrofes": [
+   "– Ao Senhor pertence a terra e o que ela encerra, o mundo inteiro com os seres que o povoam; porque ele a tornou firme sobre os mares e, sobre as águas, a mantém inabalável.",
+   "– “Quem subirá até o monte do Senhor, quem ficará em sua santa habitação?” “Quem tem mãos puras e inocente coração, quem não dirige sua mente para o crime.",
+   "– Sobre este desce a bênção do Senhor e a recompensa de seu Deus e salvador.” “É assim a geração dos que o procuram e do Deus de Israel buscam a face.”"
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "São Gregório Magno, papa e doutor da Igreja, Memória",
+  "referencia": "Sl 23(24)",
+  "refrao": "Ao Senhor pertence a terra e o que ela encerra.",
+  "id": "2026-09-03"
+ },
+ {
   "cor": "Vermelho",
   "criadoEm": "2026-09-16",
   "data": "2026-09-16",
@@ -16,12 +143,12 @@
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:15:42.648764+00:00",
   "data": "2026-09-17",
   "estrofes": [
-   "\"Eterna é a sua misericórdia!\" A casa de Israel agora o diga: \"Eterna é a sua misericórdia!\"",
-   "\"A mão direita do Senhor fez maravilhas, a mão direita do Senhor me levantou, a mão direita do Senhor fez maravilhas!\" Não morrerei, mas, ao contrário, viverei para cantar as grandes obras do Senhor!",
-   "Vós sois meu Deus, eu vos bendigo e agradeço! Vós sois meu Deus, eu vos exalto com louvores!"
+   "– Dai graças ao Senhor, porque ele é bom! “Eterna é a sua misericórdia!” A casa de Israel agora o diga: “Eterna é a sua misericórdia!”",
+   "– “A mão direita do Senhor fez maravilhas, a mão direita do Senhor me levantou, a mão direita do Senhor fez maravilhas!” Não morrerei, mas, ao contrário, viverei para cantar as grandes obras do Senhor!",
+   "– Vós sois meu Deus, eu vos bendigo e agradeço! Vós sois meu Deus, eu vos exalto com louvores!"
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
   "liturgia": "5ª feira da 24ª Semana do Tempo Comum",
@@ -31,12 +158,12 @@
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:15:45.659945+00:00",
   "data": "2026-09-18",
   "estrofes": [
-   "Ó Senhor, ouvi a minha justa causa, escutai-me e atendei o meu clamor! Inclinai o vosso ouvido à minha prece, pois não existe falsidade nos meus lábios!",
-   "Eu vos chamo, ó meu Deus, porque me ouvis, inclinai o vosso ouvido e escutai-me! Mostrai-me vosso amor maravilhoso, vós que salvais e libertais do inimigo quem procura a proteção junto de vós.",
-   "Protegei-me qual dos olhos a pupila e guardai-me à proteção de vossas asas. E verei, justificado, a vossa face, e, ao despertar, me saciará vossa presença."
+   "– Ó Senhor, ouvi a minha justa causa, escutai-me e atendei o meu clamor! Inclinai o vosso ouvido à minha prece, pois não existe falsidade nos meus lábios!",
+   "– Eu vos chamo, ó meu Deus, porque me ouvis, inclinai o vosso ouvido e escutai-me! Mostrai-me vosso amor maravilhoso, vós que salvais e libertais do inimigo quem procura a proteção junto de vós.",
+   "– Protegei-me qual dos olhos a pupila e guardai-me à proteção de vossas asas. E verei, justificado, a vossa face, e, ao despertar, me saciará vossa presença."
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
   "liturgia": "6ª feira da 24ª Semana do Tempo Comum",
@@ -46,12 +173,12 @@
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:15:47.402428+00:00",
   "data": "2026-09-19",
   "estrofes": [
-   "Meus inimigos haverão de recuar em qualquer dia em que eu vos invocar; tenho certeza: o Senhor está comigo!",
-   "Confio em Deus e louvarei sua promessa; é no Senhor que eu confio e nada temo: que poderia contra mim um ser mortal?",
-   "Devo cumprir, ó Deus, os votos que vos fiz e vos oferto um sacrifício de louvor, porque da morte arrancastes minha vida e não deixastes os meus pés escorregarem, para que eu ande na presença do Senhor, na presença do Senhor na luz da vida."
+   "– Meus inimigos haverão de recuar em qualquer dia em que eu vos invocar; tenho certeza: o Senhor está comigo!",
+   "– Confio em Deus e louvarei sua promessa; é no Senhor que eu confio e nada temo: que poderia contra mim um ser mortal?",
+   "– Devo cumprir, ó Deus, os votos que vos fiz e vos oferto um sacrifício de louvor, porque da morte arrancastes minha vida e não deixastes os meus pés escorregarem, para que eu ande na presença do Senhor, na presença do Senhor na luz da vida."
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
   "liturgia": "Sábado da 24ª Semana do Tempo Comum",
@@ -60,37 +187,38 @@
   "id": "2026-09-19"
  },
  {
+  "atualizadoEm": "2026-09-18T17:46:12.354Z",
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
   "data": "2026-09-20",
   "estrofes": [
-   "Todos os dias haverei de bendizer-vos, hei de louvar o vosso nome para sempre. Grande é o Senhor e muito digno de louvores, e ninguém pode medir sua grandeza.",
-   "Misericórdia e piedade é o Senhor, ele é amor, é paciência, é compaixão. O Senhor é muito bom para com todos, sua ternura abraça toda criatura.",
-   "É justo o Senhor em seus caminhos, é santo em toda obra que ele faz. Ele está perto da pessoa que o invoca, de todo aquele que o invoca lealmente."
+   "(G D C B7 / G D C B7)",
+   "– Todos os dias haverei de bendizer-vos, hei de louvar o vosso nome para sempre. Grande é o Senhor e muito digno de louvores, e ninguém pode medir sua grandeza.",
+   "– Misericórdia e piedade é o Senhor, ele é amor, é paciência, é compaixão. O Senhor é muito bom para com todos, sua ternura abraça toda criatura.",
+   "– É justo o Senhor em seus caminhos, é santo em toda obra que ele faz. Ele está perto da pessoa que o invoca, de todo aquele que o invoca lealmente."
   ],
-  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "fonte": "Editado manualmente",
   "liturgia": "25º Domingo do Tempo Comum",
   "referencia": "Sl 144(145)",
-  "refrao": "O Senhor está perto da pessoa que o invoca!",
+  "refrao": "O Senhor está perto da pessoa que o invoca!    (Em C d Em)",
   "id": "2026-09-20"
  },
  {
   "cor": "Vermelho",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:15:49.303549+00:00",
   "data": "2026-09-21",
   "estrofes": [
    "Os céus proclamam a glória do Senhor, e o firmamento, a obra de suas mãos; o dia ao dia transmite esta mensagem, a noite à noite publica esta notícia.",
    "Não são discursos nem frases ou palavras, nem são vozes que possam ser ouvidas; seu som ressoa e se espalha em toda a terra, chega aos confins do universo a sua voz"
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
-  "liturgia": "São Mateus, Apóstolo e Evangelista",
+  "liturgia": "São Mateus, Apóstolo e Evangelista, Festa",
   "referencia": "Sl 18",
   "refrao": "Seu som ressoa e se espalha em toda a terra.",
   "id": "2026-09-21"
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:15:50.241358+00:00",
   "data": "2026-09-22",
   "estrofes": [
    "Feliz o homem sem pecado em seu caminho, que na lei do Senhor Deus vai progredindo!",
@@ -108,31 +236,31 @@
  },
  {
   "cor": "Branco",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:15:51.570242+00:00",
   "data": "2026-09-23",
   "estrofes": [
-   "Afastai-me do caminho da mentira e dai-me a vossa lei como um presente!",
-   "A lei de vossa boca, para mim, vale mais do que milhões em ouro e prata.",
-   "É eterna, ó Senhor, vossa Palavra, ela é tão firme e estável como o céu.",
-   "De todo mau caminho afasto os passos, para que eu siga fielmente as vossas ordens.",
-   "De vossa lei eu recebi inteligência, por isso odeio os caminhos da mentira.",
-   "Eu odeio e detesto a falsidade, porém amo vossas leis e mandamentos!"
+   "– Afastai-me do caminho da mentira e dai-me a vossa lei como um presente!",
+   "– A lei de vossa boca, para mim, vale mais do que milhões em ouro e prata.",
+   "– É eterna, ó Senhor, vossa Palavra, ela é tão firme e estável como o céu.",
+   "– De todo mau caminho afasto os passos, para que eu siga fielmente as vossas ordens.",
+   "– De vossa lei eu recebi inteligência, por isso odeio os caminhos da mentira.",
+   "– Eu odeio e detesto a falsidade, porém amo vossas leis e mandamentos!"
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
-  "liturgia": "São Pio de Pietrelcina, presbítero",
+  "liturgia": "São Pio de Pietrelcina, presbítero, Memória",
   "referencia": "Sl 118(119)",
   "refrao": "Vossa Palavra é uma luz para os meus passos!",
   "id": "2026-09-23"
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:15:52.460074+00:00",
   "data": "2026-09-24",
   "estrofes": [
-   "Vós fazeis voltar ao pó todo mortal quando dizeis: \"Voltai ao pó, filhos de Adão!\" Pois mil anos para vós são como ontem, qual vigília de uma noite que passou.",
-   "Eles passam como o sono da manhã, são iguais à erva verde pelos campos: de manhã ela floresce vicejante, mas à tarde é cortada e logo seca.",
-   "Ensinai-nos a contar os nossos dias e dai ao nosso coração sabedoria! Senhor, voltai-vos! Até quando tardareis? Tende piedade e compaixão de vossos servos!",
-   "Saciai-nos de manhã com vosso amor, e exultaremos de alegria todo o dia! Que a bondade do Senhor e nosso Deus repouse sobre nós e nos conduza! Tornai fecundo, ó Senhor, nosso trabalho."
+   "– Vós fazeis voltar ao pó todo mortal quando dizeis: “Voltai ao pó, filhos de Adão!” Pois mil anos para vós são como ontem, qual vigília de uma noite que passou.",
+   "– Eles passam como o sono da manhã, são iguais à erva verde pelos campos: de manhã ela floresce vicejante, mas à tarde é cortada e logo seca.",
+   "– Ensinai-nos a contar os nossos dias e dai ao nosso coração sabedoria! Senhor, voltai-vos! Até quando tardareis? Tende piedade e compaixão de vossos servos!",
+   "– Saciai-nos de manhã com vosso amor, e exultaremos de alegria todo o dia! Que a bondade do Senhor e nosso Deus repouse sobre nós e nos conduza! Tornai fecundo, ó Senhor, nosso trabalho."
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
   "liturgia": "5ª feira da 25ª Semana do Tempo Comum",
@@ -142,11 +270,11 @@
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:15:53.762790+00:00",
   "data": "2026-09-25",
   "estrofes": [
-   "Ele é meu amor, meu refúgio, libertador, fortaleza e abrigo. É meu escudo: é nele que espero.",
-   "Que é o homem, Senhor, para vós? Por que dele cuidais tanto assim e no filho do homem pensais? Como o sopro de vento é o homem, os seus dias são sombra que passa."
+   "– Bendito seja o Senhor, meu rochedo. Ele é meu amor, meu refúgio, libertador, fortaleza e abrigo. É meu escudo: é nele que espero.",
+   "– Que é o homem, Senhor, para vós? Por que dele cuidais tanto assim e no filho do homem pensais? Como o sopro de vento é o homem, os seus dias são sombra que passa."
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
   "liturgia": "6ª feira da 25ª Semana do Tempo Comum",
@@ -156,10 +284,10 @@
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:15:55.101273+00:00",
   "data": "2026-09-26",
   "estrofes": [
-   "Vós fazeis voltar ao pó todo mortal, quando dizeis: 'Voltai ao pó, filhos de Adão!' Pois mil anos para vós são como ontem, qual vigília de uma noite que passou.",
+   "Vós fazeis voltar ao pó todo mortal, quando dizeis: “Voltai ao pó, filhos de Adão!” Pois mil anos para vós são como ontem, qual vigília de uma noite que passou.",
    "Eles passam como o sono da manhã, são iguais à erva verde pelos campos: de manhã ela floresce vicejante, mas à tarde é cortada e logo seca.",
    "Ensinai-nos a contar os nossos dias, e dai ao nosso coração sabedoria! Senhor, voltai-vos! Até quando tardareis? Tende piedade e compaixão de vossos servos!",
    "Saciai-nos de manhã com vosso amor, e exultaremos de alegria todo o dia! Que a bondade do Senhor e nosso Deus repouse sobre nós e nos conduza! Tornai fecundo, ó Senhor, nosso trabalho"
@@ -172,12 +300,12 @@
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:15:56.116136+00:00",
   "data": "2026-09-27",
   "estrofes": [
-   "Mostrai-me, ó Senhor, vossos caminhos e fazei-me conhecer a vossa estrada! Vossa verdade me oriente e me conduza, porque sois o Deus da minha salvação; em vós espero, ó Senhor, todos os dias!",
-   "Recordai, Senhor meu Deus, vossa ternura e a vossa compaixão, que são eternas! Não recordeis os meus pecados quando jovem nem vos lembreis de minhas faltas e delitos! De mim lembrai-vos, porque sois misericórdia e sois bondade sem limites, ó Senhor!",
-   "O Senhor é piedade e retidão e reconduz ao bom caminho os pecadores. Ele dirige os humildes na justiça e aos pobres ele ensina o seu caminho."
+   "– Mostrai-me, ó Senhor, vossos caminhos e fazei-me conhecer a vossa estrada! Vossa verdade me oriente e me conduza, porque sois o Deus da minha salvação; em vós espero, ó Senhor, todos os dias!",
+   "– Recordai, Senhor meu Deus, vossa ternura e a vossa compaixão, que são eternas! Não recordeis os meus pecados quando jovem nem vos lembreis de minhas faltas e delitos! De mim lembrai-vos, porque sois misericórdia e sois bondade sem limites, ó Senhor!",
+   "– O Senhor é piedade e retidão e reconduz ao bom caminho os pecadores. Ele dirige os humildes na justiça e aos pobres ele ensina o seu caminho."
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
   "liturgia": "26º Domingo do Tempo Comum",
@@ -187,12 +315,12 @@
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:15:57.474840+00:00",
   "data": "2026-09-28",
   "estrofes": [
-   "Ó Senhor, ouvi a minha justa causa, escutai-me e atendei o meu clamor! Inclinai o vosso ouvido à minha prece, pois não existe falsidade nos meus lábios!",
-   "De vossa face é que me venha o julgamento, pois vossos olhos sabem ver o que é justo. Provai meu coração durante a noite, visitai-o, examinai-o pelo fogo, mas em mim não achareis iniquidade.",
-   "Eu vos chamo, ó meu Deus, porque me ouvis, inclinai o vosso ouvido e escutai-me! Mostrai-me vosso amor maravilhoso, vós que salvais e libertais do inimigo quem procura a proteção junto de vós."
+   "– Ó Senhor, ouvi a minha justa causa, escutai-me e atendei o meu clamor! Inclinai o vosso ouvido à minha prece, pois não existe falsidade nos meus lábios!",
+   "– De vossa face é que me venha o julgamento, pois vossos olhos sabem ver o que é justo. Provai meu coração durante a noite, visitai-o, examinai-o pelo fogo, mas em mim não achareis iniquidade.",
+   "– Eu vos chamo, ó meu Deus, porque me ouvis, inclinai o vosso ouvido e escutai-me! Mostrai-me vosso amor maravilhoso, vós que salvais e libertais do inimigo quem procura a proteção junto de vós."
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
   "liturgia": "2ª feira da 26ª Semana do Tempo Comum",
@@ -202,92 +330,92 @@
  },
  {
   "cor": "Branco",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:15:58.387622+00:00",
   "data": "2026-09-29",
   "estrofes": [
-   "Ó Senhor, de coração eu vos dou graças, porque ouvistes as palavras dos meus lábios! Perante os vossos anjos vou cantar-vos e ante o vosso templo vou prostrar-me.",
-   "Eu agradeço vosso amor, vossa verdade, porque fizestes muito mais que prometestes; naquele dia em que gritei, vós me escutastes e aumentastes o vigor da minha alma.",
-   "Os reis de toda a terra hão de louvar-vos quando ouvirem, ó Senhor, vossa promessa. Hão de cantar vossos caminhos e dirão: \"Como a glória do Senhor é grandiosa!\""
+   "– Ó Senhor, de coração eu vos dou graças, porque ouvistes as palavras dos meus lábios! Perante os vossos anjos vou cantar-vos e ante o vosso templo vou prostrar-me.",
+   "– Eu agradeço vosso amor, vossa verdade, porque fizestes muito mais que prometestes; naquele dia em que gritei, vós me escutastes e aumentastes o vigor da minha alma.",
+   "– Os reis de toda a terra hão de louvar-vos quando ouvirem, ó Senhor, vossa promessa. Hão de cantar vossos caminhos e dirão: “Como a glória do Senhor é grandiosa!”"
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
-  "liturgia": "Santos Miguel, Gabriel e Rafael, Arcanjos",
+  "liturgia": "Santos Miguel, Gabriel e Rafael, Arcanjos, Festa",
   "referencia": "Sl 137(138)",
   "refrao": "Perante os vossos anjos, vou cantar-vos, ó Senhor!",
   "id": "2026-09-29"
  },
  {
   "cor": "Branco",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:15:59.783364+00:00",
   "data": "2026-09-30",
   "estrofes": [
-   "Clamo a vós, ó Senhor, sem cessar, todo o dia, minhas mãos para vós se levantam em prece. Para os mortos, acaso, faríeis milagres? Poderiam as sombras erguer-se e louvar-vos?",
-   "No sepulcro haverá quem vos cante o amor e proclame entre os mortos a vossa verdade? Vossas obras serão conhecidas nas trevas, vossa graça, no reino onde tudo se esquece?",
-   "Quanto a mim, ó Senhor, clamo a vós na aflição, minha prece se eleva até vós desde a aurora. Por que vós, ó Senhor, rejeitais a minha alma? E por que escondeis vossa face de mim?"
+   "– Clamo a vós, ó Senhor, sem cessar, todo o dia, minhas mãos para vós se levantam em prece. Para os mortos, acaso, faríeis milagres? Poderiam as sombras erguer-se e louvar-vos?",
+   "– No sepulcro haverá quem vos cante o amor e proclame entre os mortos a vossa verdade? Vossas obras serão conhecidas nas trevas, vossa graça, no reino onde tudo se esquece?",
+   "– Quanto a mim, ó Senhor, clamo a vós na aflição, minha prece se eleva até vós desde a aurora. Por que vós, ó Senhor, rejeitais a minha alma? E por que escondeis vossa face de mim?"
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
-  "liturgia": "São Jerônimo, presbítero e doutor da Igreja",
+  "liturgia": "São Jerônimo, presbítero e doutor da Igreja, Memória",
   "referencia": "Sl 87(88)",
   "refrao": "Chegue a minha oração até a vossa presença!",
   "id": "2026-09-30"
  },
  {
   "cor": "Branco",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:16:00.693813+00:00",
   "data": "2026-10-01",
   "estrofes": [
-   "Ó Senhor, ouvi a voz do meu apelo, atendei por compaixão! Meu coração fala convosco confiante e os meus olhos vos procuram.",
-   "Senhor, é vossa face que eu procuro; não me escondais a vossa face! Não afasteis em vossa ira o vosso servo, sois vós o meu auxílio! Não me esqueçais nem me deixeis abandonado, meu Deus e salvador!",
-   "Espera no Senhor e tem coragem, espera no Senhor!"
+   "– Ó Senhor, ouvi a voz do meu apelo, atendei por compaixão! Meu coração fala convosco confiante e os meus olhos vos procuram.",
+   "– Senhor, é vossa face que eu procuro; não me escondais a vossa face! Não afasteis em vossa ira o vosso servo, sois vós o meu auxílio! Não me esqueçais nem me deixeis abandonado, meu Deus e salvador!",
+   "– Sei que a bondade do Senhor eu hei de ver na terra dos viventes. Espera no Senhor e tem coragem, espera no Senhor!"
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
-  "liturgia": "Santa Teresa do Menino Jesus, virgem e doutora da Igreja",
+  "liturgia": "Santa Teresa do Menino Jesus, virgem e doutora da Igreja, Memória",
   "referencia": "Sl 26(27)",
   "refrao": "Sei que a bondade do Senhor eu hei de ver na terra dos viventes.",
   "id": "2026-10-01"
  },
  {
   "cor": "Branco",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:16:01.600112+00:00",
   "data": "2026-10-02",
   "estrofes": [
-   "Quem habita ao abrigo do Altíssimo e vive à sombra do Senhor onipotente, diz ao Senhor: \"Sois meu refúgio e proteção, sois o meu Deus, no qual confio inteiramente\".",
+   "Quem habita ao abrigo do Altíssimo e vive à sombra do Senhor onipotente, diz ao Senhor: “Sois meu refúgio e proteção, sois o meu Deus, no qual confio inteiramente”.",
    "Do caçador e do seu laço ele te livra. Ele te salva da palavra que destrói. Com suas asas haverá de proteger-te, com seu escudo e suas armas, defender-te.",
    "Não temerás terror algum durante a noite, nem a flecha disparada em pleno dia; nem a peste que caminha pelo escuro, nem a desgraça que devasta ao meio-dia.",
    "Nenhum mal há de chegar perto de ti, nem a desgraça baterá à tua porta; pois o Senhor deu uma ordem a seus anjos para em todos os caminhos te guardarem"
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
-  "liturgia": "Santos Anjos da Guarda",
+  "liturgia": "Santos Anjos da Guarda, Memória",
   "referencia": "Sl 90",
   "refrao": "O Senhor deu uma ordem aos seus anjos, para em todos os caminhos te guardarem.",
   "id": "2026-10-02"
  },
  {
   "cor": "Vermelho",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:16:02.904861+00:00",
   "data": "2026-10-03",
   "estrofes": [
-   "Dai-me bom senso, retidão, sabedoria, pois tenho fé nos vossos santos mandamentos!",
-   "Para mim foi muito bom ser humilhado, porque assim eu aprendi vossa vontade!",
-   "Sei que os vossos julgamentos são corretos, e com justiça me provastes, ó Senhor!",
-   "Porque mandastes, tudo existe até agora; todas as coisas, ó Senhor, vos obedecem!",
-   "Sou vosso servo: concedei-me inteligência, para que eu possa compreender vossa aliança!",
-   "Vossa palavra, ao revelar-se, me ilumina, ela dá sabedoria aos pequeninos."
+   "– Dai-me bom senso, retidão, sabedoria, pois tenho fé nos vossos santos mandamentos!",
+   "– Para mim foi muito bom ser humilhado, porque assim eu aprendi vossa vontade!",
+   "– Sei que os vossos julgamentos são corretos, e com justiça me provastes, ó Senhor!",
+   "– Porque mandastes, tudo existe até agora; todas as coisas, ó Senhor, vos obedecem!",
+   "– Sou vosso servo: concedei-me inteligência, para que eu possa compreender vossa aliança!",
+   "– Vossa palavra, ao revelar-se, me ilumina, ela dá sabedoria aos pequeninos."
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
-  "liturgia": "Santos André de Soveral e Ambrósio Francisco Ferro, presbíteros, Mateus Moreira e companheiros, mártires",
+  "liturgia": "Santos André de Soveral e Ambrósio Francisco Ferro, presbíteros, Mateus Moreira e companheiros, mártires, Memória",
   "referencia": "Sl 118(119)",
   "refrao": "Fazei brilhar vosso semblante ao vosso servo e ensinai-me vossas leis e mandamentos.",
   "id": "2026-10-03"
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:16:03.810701+00:00",
   "data": "2026-10-04",
   "estrofes": [
-   "Arrancastes do Egito esta videira e expulsastes as nações para plantá-la; até o mar se estenderam seus sarmentos, até o rio os seus rebentos se espalharam.",
-   "Por que razão vós destruístes sua cerca, para que todos os passantes a vindimem, o javali da mata virgem a devaste e os animais do descampado nela pastem?",
-   "Voltai-vos para nós, Deus do universo! Olhai dos altos céus e observai. Visitai a vossa vinha e protegei-a! Foi a vossa mão direita que a plantou; protegei-a, e ao rebento que firmastes!",
-   "E nunca mais vos deixaremos, Senhor Deus! Dai-nos vida, e louvaremos vosso nome! Convertei-nos, ó Senhor Deus do universo, e sobre nós iluminai a vossa face! Se voltardes para nós, seremos salvos!"
+   "– Arrancastes do Egito esta videira e expulsastes as nações para plantá-la; até o mar se estenderam seus sarmentos, até o rio os seus rebentos se espalharam.",
+   "– Por que razão vós destruístes sua cerca, para que todos os passantes a vindimem, o javali da mata virgem a devaste e os animais do descampado nela pastem?",
+   "– Voltai-vos para nós, Deus do universo! Olhai dos altos céus e observai. Visitai a vossa vinha e protegei-a! Foi a vossa mão direita que a plantou; protegei-a, e ao rebento que firmastes!",
+   "– E nunca mais vos deixaremos, Senhor Deus! Dai-nos vida, e louvaremos vosso nome! Convertei-nos, ó Senhor Deus do universo, e sobre nós iluminai a vossa face! Se voltardes para nós, seremos salvos!"
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
   "liturgia": "27º Domingo do Tempo Comum",
@@ -297,12 +425,12 @@
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:16:04.707297+00:00",
   "data": "2026-10-05",
   "estrofes": [
-   "Eu agradeço a Deus de todo o coração, junto com todos os seus justos reunidos! Que grandiosas são as obras do Senhor, elas merecem todo o amor e admiração!",
-   "Suas obras são verdade e são justiça, seus preceitos, todos eles, são estáveis, confirmados para sempre e pelos séculos, realizados na verdade e retidão.",
-   "Enviou libertação para o seu povo, confirmou sua Aliança para sempre. Seu nome é santo e é digno de respeito. Permaneça eternamente o seu louvor."
+   "– Eu agradeço a Deus de todo o coração, junto com todos os seus justos reunidos! Que grandiosas são as obras do Senhor, elas merecem todo o amor e admiração!",
+   "– Suas obras são verdade e são justiça, seus preceitos, todos eles, são estáveis, confirmados para sempre e pelos séculos, realizados na verdade e retidão.",
+   "– Enviou libertação para o seu povo, confirmou sua Aliança para sempre. Seu nome é santo e é digno de respeito. Permaneça eternamente o seu louvor."
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
   "liturgia": "2ª feira da 27ª Semana do Tempo Comum",
@@ -312,12 +440,12 @@
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:16:05.616325+00:00",
   "data": "2026-10-06",
   "estrofes": [
-   "Senhor, vós me sondais e conheceis, sabeis quando me sento ou me levanto; de longe penetrais meus pensamentos, percebeis quando me deito e quando eu ando, os meus caminhos vos são todos conhecidos.",
-   "Fostes vós que me formastes as entranhas, e no seio de minha mãe vós me tecestes. Eu vos louvo e vos dou graças, ó Senhor, porque de modo admirável me formastes! Que prodígio e maravilha as vossas obras!",
-   "Até o mais íntimo, Senhor, me conheceis; nenhuma sequer de minhas fibras ignoráveis; quando eu era modelado ocultamente, era formado nas entranhas subterrâneas."
+   "– Senhor, vós me sondais e conheceis, sabeis quando me sento ou me levanto; de longe penetrais meus pensamentos, percebeis quando me deito e quando eu ando, os meus caminhos vos são todos conhecidos.",
+   "– Fostes vós que me formastes as entranhas, e no seio de minha mãe vós me tecestes. Eu vos louvo e vos dou graças, ó Senhor, porque de modo admirável me formastes! Que prodígio e maravilha as vossas obras!",
+   "– Até o mais íntimo, Senhor, me conheceis; nenhuma sequer de minhas fibras ignoráveis; quando eu era modelado ocultamente, era formado nas entranhas subterrâneas."
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
   "liturgia": "3ª feira da 27ª Semana do Tempo Comum",
@@ -327,44 +455,44 @@
  },
  {
   "cor": "Branco",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:16:06.579812+00:00",
   "data": "2026-10-07",
   "estrofes": [
-   "A minha alma engrandece ao Senhor, e se alegrou o meu espírito em Deus, meu salvador.",
-   "Pois ele viu a pequenez de sua serva, desde agora as gerações hão de chamar-me de bendita.",
-   "Seu amor, de geração em geração, chega a todos que o respeitam. Demonstrou o poder de seu braço, dispersou os orgulhosos.",
-   "Derrubou os poderosos de seus tronos e os humildes exaltou. De bens saciou os famintos e despediu, sem nada, os ricos.",
-   "Acolheu Israel, seu servidor, fiel ao seu amor, como havia prometido aos nossos pais, em favor de Abraão e de seus filhos para sempre."
+   "– A minha alma engrandece ao Senhor, e se alegrou o meu espírito em Deus, meu salvador.",
+   "– Pois ele viu a pequenez de sua serva, desde agora as gerações hão de chamar-me de bendita. O Poderoso fez por mim maravilhas, e santo é o seu nome!",
+   "– Seu amor, de geração em geração, chega a todos que o respeitam. Demonstrou o poder de seu braço, dispersou os orgulhosos.",
+   "– Derrubou os poderosos de seus tronos e os humildes exaltou. De bens saciou os famintos e despediu, sem nada, os ricos.",
+   "– Acolheu Israel, seu servidor, fiel ao seu amor, como havia prometido aos nossos pais, em favor de Abraão e de seus filhos para sempre."
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
-  "liturgia": "Bem-aventurada Virgem Maria do Rosário",
-  "referencia": "Lc 1 (cântico)",
+  "liturgia": "Bem-aventurada Virgem Maria do Rosário, Memória",
+  "referencia": "Sl Lc 1",
   "refrao": "O Poderoso fez por mim maravilhas e santo é o seu nome!",
   "id": "2026-10-07"
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:16:07.474643+00:00",
   "data": "2026-10-08",
   "estrofes": [
-   "Fez surgir um poderoso salvador na casa de Davi, seu servidor, como falara pela boca de seus santos, os profetas desde os tempos mais antigos.",
-   "Para salvar-nos do poder dos inimigos e da mão de todos quantos nos odeiam. Assim mostrou misericórdia a nossos pais, recordando a sua santa Aliança.",
-   "E o juramento a Abraão, o nosso pai, de conceder-nos que, libertos do inimigo, a ele nós sirvamos sem temor, em santidade e em justiça diante dele, enquanto perdurarem nossos dias."
+   "– Fez surgir um poderoso salvador na casa de Davi, seu servidor, como falara pela boca de seus santos, os profetas desde os tempos mais antigos.",
+   "– Para salvar-nos do poder dos inimigos e da mão de todos quantos nos odeiam. Assim mostrou misericórdia a nossos pais, recordando a sua santa Aliança.",
+   "– E o juramento a Abraão, o nosso pai, de conceder-nos que, libertos do inimigo, a ele nós sirvamos sem temor, em santidade e em justiça diante dele, enquanto perdurarem nossos dias."
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
   "liturgia": "5ª feira da 27ª Semana do Tempo Comum",
-  "referencia": "Lc 1 (cântico)",
+  "referencia": "Sl Lc 1",
   "refrao": "Bendito seja o Senhor Deus de Israel, porque a seu povo visitou e libertou!",
   "id": "2026-10-08"
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:16:08.391246+00:00",
   "data": "2026-10-09",
   "estrofes": [
-   "Eu agradeço a Deus, de todo o coração, junto com todos os seus justos reunidos! Que grandiosas são as obras do Senhor, elas merecem todo o amor e admiração!",
-   "Que beleza e esplendor são os seus feitos! Sua justiça permanece eternamente! O Senhor bom e clemente nos deixou a lembrança de suas grandes maravilhas.",
-   "Ele dá o alimento aos que o temem e jamais esquecerá sua Aliança. Ao seu povo manifesta seu poder, dando a ele a herança das nações."
+   "– Eu agradeço a Deus, de todo o coração, junto com todos os seus justos reunidos! Que grandiosas são as obras do Senhor, elas merecem todo o amor e admiração!",
+   "– Que beleza e esplendor são os seus feitos! Sua justiça permanece eternamente! O Senhor bom e clemente nos deixou a lembrança de suas grandes maravilhas.",
+   "– Ele dá o alimento aos que o temem e jamais esquecerá sua Aliança. Ao seu povo manifesta seu poder, dando a ele a herança das nações."
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
   "liturgia": "6ª feira da 27ª Semana do Tempo Comum",
@@ -374,12 +502,12 @@
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:16:09.297198+00:00",
   "data": "2026-10-10",
   "estrofes": [
-   "Cantai, entoai salmos para ele, publicai todas as suas maravilhas! Gloriai-vos em seu nome, que é santo, exulte o coração que busca a Deus!",
-   "Procurai o Senhor Deus e seu poder, buscai constantemente a sua face! Lembrai as maravilhas que ele fez, seus prodígios e as palavras de seus lábios!",
-   "Descendentes de Abraão, seu servidor, e filhos de Jacó, seu escolhido, ele mesmo, o Senhor, é nosso Deus, vigoram suas leis em toda a terra."
+   "– Cantai, entoai salmos para ele, publicai todas as suas maravilhas! Gloriai-vos em seu nome, que é santo, exulte o coração que busca a Deus!",
+   "– Procurai o Senhor Deus e seu poder, buscai constantemente a sua face! Lembrai as maravilhas que ele fez, seus prodígios e as palavras de seus lábios!",
+   "– Descendentes de Abraão, seu servidor, e filhos de Jacó, seu escolhido, ele mesmo, o Senhor, é nosso Deus, vigoram suas leis em toda a terra."
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
   "liturgia": "Sábado da 27ª Semana do Tempo Comum",
@@ -389,13 +517,13 @@
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:16:10.157976+00:00",
   "data": "2026-10-11",
   "estrofes": [
-   "O Senhor é o pastor que me conduz; não me falta coisa alguma. Pelos prados e campinas verdejantes ele me leva a descansar. Para as águas repousantes me encaminha e restaura as minhas forças.",
-   "Ele me guia no caminho mais seguro, pela honra do seu nome. Mesmo que eu passe pelo vale tenebroso, nenhum mal eu temerei; estais comigo com bastão e com cajado: eles me dão a segurança!",
-   "Preparais à minha frente uma mesa, bem à vista do inimigo, e com óleo vós ungis minha cabeça; o meu cálice transborda.",
-   "Felicidade e todo bem hão de seguir-me por toda a minha vida; e na casa do Senhor habitarei pelos tempos infinitos."
+   "– O Senhor é o pastor que me conduz; não me falta coisa alguma. Pelos prados e campinas verdejantes ele me leva a descansar. Para as águas repousantes me encaminha e restaura as minhas forças.",
+   "– Ele me guia no caminho mais seguro, pela honra do seu nome. Mesmo que eu passe pelo vale tenebroso, nenhum mal eu temerei; estais comigo com bastão e com cajado: eles me dão a segurança!",
+   "– Preparais à minha frente uma mesa, bem à vista do inimigo, e com óleo vós ungis minha cabeça; o meu cálice transborda.",
+   "– Felicidade e todo bem hão de seguir-me por toda a minha vida; e na casa do Senhor habitarei pelos tempos infinitos."
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
   "liturgia": "28º Domingo do Tempo Comum",
@@ -405,30 +533,30 @@
  },
  {
   "cor": "Branco",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:16:11.061240+00:00",
   "data": "2026-10-12",
   "estrofes": [
-   "Esquecei vosso povo e a casa paterna! Que o Rei se encante com vossa beleza! Prestai-lhe homenagem: é vosso Senhor!",
+   "Escutai, minha filha, olhai, ouvi isto: “Esquecei vosso povo e a casa paterna! Que o Rei se encante com vossa beleza! Prestai-lhe homenagem: é vosso Senhor!",
    "O povo de Tiro vos traz seus presentes, os grandes do povo vos pedem favores. Majestosa, a princesa real vem chegando, vestida de ricos brocados de ouro.",
-   "Em vestes vistosas ao Rei se dirige, e as virgens amigas lhe formam cortejo; entre cantos de festa e com grande alegria, ingressam, então, no palácio real"
+   "Em vestes vistosas ao Rei se dirige, e as virgens amigas lhe formam cortejo; entre cantos de festa e com grande alegria, ingressam, então, no palácio real”"
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
-  "liturgia": "Nossa Senhora Aparecida, Padroeira do Brasil",
-  "referencia": "Sl 44(45)",
+  "liturgia": "Bem-Aventurada Virgem Maria da Conceição Aparecida, Padroeira do Brasil, Solenidade",
+  "referencia": "Sl 44",
   "refrao": "Escutai, minha filha, olhai, ouvi isto: que o Rei se encante com vossa beleza!",
   "id": "2026-10-12"
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:16:11.959064+00:00",
   "data": "2026-10-13",
   "estrofes": [
-   "Senhor, que desça sobre mim a vossa graça e a vossa salvação que prometestes!",
-   "Não retireis vossa verdade de meus lábios, pois eu confio em vossos justos julgamentos!",
-   "Cumprirei constantemente a vossa lei; para sempre, eternamente a cumprirei!",
-   "É amplo e agradável meu caminho, porque busco e pesquiso as vossas ordens.",
-   "Muito me alegro com os vossos mandamentos, que eu amo, amo tanto, mais que tudo!",
-   "Elevarei as minhas mãos para louvar-vos e com prazer meditarei vossa vontade."
+   "– Senhor, que desça sobre mim a vossa graça e a vossa salvação que prometestes!",
+   "– Não retireis vossa verdade de meus lábios, pois eu confio em vossos justos julgamentos!",
+   "– Cumprirei constantemente a vossa lei; para sempre, eternamente a cumprirei!",
+   "– É amplo e agradável meu caminho, porque busco e pesquiso as vossas ordens.",
+   "– Muito me alegro com os vossos mandamentos, que eu amo, amo tanto, mais que tudo!",
+   "– Elevarei as minhas mãos para louvar-vos e com prazer meditarei vossa vontade."
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
   "liturgia": "3ª feira da 28ª Semana do Tempo Comum",
@@ -438,12 +566,12 @@
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:16:12.886070+00:00",
   "data": "2026-10-14",
   "estrofes": [
-   "Feliz é todo aquele que não anda conforme os conselhos dos perversos; que não entra no caminho dos malvados nem junto aos zombadores vai sentar-se; mas encontra seu prazer na lei de Deus e a medita, dia e noite, sem cessar.",
-   "Eis que ele é semelhante a uma árvore que à beira da torrente está plantada; ela sempre dá seus frutos a seu tempo e jamais as suas folhas vão murchar. Eis que tudo o que ele faz vai prosperar.",
-   "Mas bem outra é a sorte dos perversos. Ao contrário, são iguais à palha seca espalhada e dispersada pelo vento. Pois Deus vigia o caminho dos eleitos, mas a estrada dos malvados leva à morte."
+   "– Feliz é todo aquele que não anda conforme os conselhos dos perversos; que não entra no caminho dos malvados nem junto aos zombadores vai sentar-se; mas encontra seu prazer na lei de Deus e a medita, dia e noite, sem cessar.",
+   "– Eis que ele é semelhante a uma árvore que à beira da torrente está plantada; ela sempre dá seus frutos a seu tempo e jamais as suas folhas vão murchar. Eis que tudo o que ele faz vai prosperar.",
+   "– Mas bem outra é a sorte dos perversos. Ao contrário, são iguais à palha seca espalhada e dispersada pelo vento. Pois Deus vigia o caminho dos eleitos, mas a estrada dos malvados leva à morte."
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
   "liturgia": "4ª feira da 28ª Semana do Tempo Comum",
@@ -453,28 +581,28 @@
  },
  {
   "cor": "Branco",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:16:13.775721+00:00",
   "data": "2026-10-15",
   "estrofes": [
-   "Cantai ao Senhor Deus um canto novo, porque ele fez prodígios! Sua mão e o seu braço forte e santo alcançaram-lhe a vitória.",
-   "O Senhor fez conhecer a salvação, e às nações, sua justiça; recordou o seu amor sempre fiel pela casa de Israel.",
-   "Os confins do universo contemplaram a salvação do nosso Deus. Aclamai o Senhor Deus, ó terra inteira, alegrai-vos e exultai!",
-   "Cantai salmos ao Senhor ao som da harpa e da cítara suave! Aclamai, com os clarins e as trombetas, ao Senhor, o nosso rei!"
+   "– Cantai ao Senhor Deus um canto novo, porque ele fez prodígios! Sua mão e o seu braço forte e santo alcançaram-lhe a vitória.",
+   "– O Senhor fez conhecer a salvação, e às nações, sua justiça; recordou o seu amor sempre fiel pela casa de Israel.",
+   "– Os confins do universo contemplaram a salvação do nosso Deus. Aclamai o Senhor Deus, ó terra inteira, alegrai-vos e exultai!",
+   "– Cantai salmos ao Senhor ao som da harpa e da cítara suave! Aclamai, com os clarins e as trombetas, ao Senhor, o nosso rei!"
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
-  "liturgia": "Santa Teresa de Jesus, virgem e doutora da Igreja",
+  "liturgia": "Santa Teresa de Jesus, virgem e doutora da Igreja, Memória",
   "referencia": "Sl 97(98)",
   "refrao": "O Senhor fez conhecer seu poder salvador perante as nações.",
   "id": "2026-10-15"
  },
  {
   "cor": "Verde",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T19:16:15.074434+00:00",
   "data": "2026-10-16",
   "estrofes": [
-   "Ó justos, alegrai-vos no Senhor! Aos retos fica bem glorificá-lo. Dai graças ao Senhor ao som da harpa, na lira de dez cordas celebrai-o!",
-   "Pois reta é a Palavra do Senhor, e tudo o que ele faz merece fé. Deus ama o direito e a justiça, transborda em toda a terra a sua graça.",
-   "Feliz o povo cujo Deus é o Senhor, e a nação que escolheu por sua herança! Dos altos céus o Senhor olha e observa; ele se inclina para olhar todos os homens."
+   "– Ó justos, alegrai-vos no Senhor! Aos retos fica bem glorificá-lo. Dai graças ao Senhor ao som da harpa, na lira de dez cordas celebrai-o!",
+   "– Pois reta é a Palavra do Senhor, e tudo o que ele faz merece fé. Deus ama o direito e a justiça, transborda em toda a terra a sua graça.",
+   "– Feliz o povo cujo Deus é o Senhor, e a nação que escolheu por sua herança! Dos altos céus o Senhor olha e observa; ele se inclina para olhar todos os homens."
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
   "liturgia": "6ª feira da 28ª Semana do Tempo Comum",
@@ -1429,19 +1557,19 @@
   "id": "2026-12-17"
  },
  {
-  "id": "2026-12-18",
-  "data": "2026-12-18",
-  "liturgia": "3a. Semana do Advento · Ciclo do Natal",
   "cor": "Roxo",
-  "referencia": "Sl 66(67)",
-  "refrao": "Que as nações vos glorifiquem, ó Senhor, que todas as nações vos glorifiquem.",
+  "criadoEm": "2026-09-17T11:12:16Z",
+  "data": "2026-12-18",
   "estrofes": [
    "Que Deus nos dê a sua graça e sua bênção, e sua face resplandeça sobre nós! Que na terra se conheça o seu caminho e a sua salvação por entre os povos.",
    "Exulte de alegria a terra inteira, pois julgais o universo com justiça; os povos governais com retidão, e guiais, em toda a terra, as nações.",
    "A terra produziu sua colheita: o Senhor e nosso Deus nos abençoa. Que o Senhor e nosso Deus nos abençoe, e o respeitem os confins de toda a terra!"
   ],
   "fonte": "https://api-liturgia-diaria.vercel.app/?date=2026-12-18",
-  "criadoEm": "2026-09-17T11:12:16Z"
+  "liturgia": "3a. Semana do Advento · Ciclo do Natal",
+  "referencia": "Sl 66(67)",
+  "refrao": "Que as nações vos glorifiquem, ó Senhor, que todas as nações vos glorifiquem.",
+  "id": "2026-12-18"
  },
  {
   "cor": "Roxo",
@@ -1476,23 +1604,23 @@
  },
  {
   "cor": "Branco",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T18:54:46.364Z",
   "data": "2026-12-25",
   "estrofes": [
    "Cantai ao Senhor Deus um canto novo, porque ele fez prodígios! Sua mão e o seu braço forte e santo alcançaram-lhe a vitória.",
    "O Senhor fez conhecer a salvação, e às nações, sua justiça; recordou o seu amor sempre fiel pela casa de Israel.",
-   "Aclamai o Senhor Deus, ó terra inteira, alegrai-vos e exultai!",
+   "Os confins do universo contemplaram a salvação do nosso Deus. Aclamai o Senhor Deus, ó terra inteira, alegrai-vos e exultai!",
    "Cantai salmos ao Senhor ao som da harpa e da cítara suave! Aclamai, com os clarins e as trombetas, ao Senhor, o nosso Rei!"
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
-  "liturgia": "Natal de Nosso Senhor Jesus Cristo",
+  "liturgia": "Natal de Nosso Senhor Jesus Cristo, Solenidade",
   "referencia": "Sl 97(98)",
   "refrao": "Os confins do universo contemplaram a salvação do nosso Deus.",
   "id": "2026-12-25"
  },
  {
   "cor": "Branco",
-  "criadoEm": "2026-09-16",
+  "criadoEm": "2026-09-17T18:16:24.316Z",
   "data": "2026-12-27",
   "estrofes": [
    "Feliz és tu se temes o Senhor e trilhas seus caminhos! Do trabalho de tuas mãos hás de viver, serás feliz, tudo irá bem!",
@@ -1500,10 +1628,25 @@
    "Será assim abençoado todo homem que teme o Senhor. O Senhor te abençoe de Sião, cada dia de tua vida."
   ],
   "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
-  "liturgia": "Sagrada Família de Jesus, Maria e José",
+  "liturgia": "Sagrada Família de Jesus, Maria e José, Festa",
   "referencia": "Sl 127(128)",
   "refrao": "Felizes os que temem o Senhor e trilham seus caminhos!",
   "id": "2026-12-27"
+ },
+ {
+  "cor": "Branco",
+  "criadoEm": "2026-09-17T18:16:08.728Z",
+  "data": "2026-12-31",
+  "estrofes": [
+   "Cantai ao Senhor Deus um canto novo, cantai ao Senhor Deus, ó terra inteira! Cantai e bendizei seu santo nome! Dia após dia anunciai sua salvação.",
+   "O céu se rejubile e exulte a terra, aplauda o mar com o que vive em suas águas; os campos com seus frutos rejubilem e exultem as florestas e as matas",
+   "na presença do Senhor, pois ele vem, porque vem para julgar a terra inteira. Governará o mundo todo com justiça, e os povos julgará com lealdade."
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "7º Dia na Oitava de Natal",
+  "referencia": "Sl 95",
+  "refrao": "O céu se rejubile e exulte a terra!",
+  "id": "2026-12-31"
  },
  {
   "cor": "Branco",
@@ -1519,5 +1662,230 @@
   "referencia": "Sl 66(67)",
   "refrao": "Que Deus nos dê a sua graça e sua bênção.",
   "id": "2027-01-01"
+ },
+ {
+  "cor": "Branco",
+  "criadoEm": "2026-09-17T19:49:51.710430+00:00",
+  "data": "2027-01-10",
+  "estrofes": [
+   "Filhos de Deus, tributai ao Senhor, tributai-lhe a glória e o poder! Dai-lhe a glória devida ao seu nome; adorai-o com santo ornamento!",
+   "Eis a voz do Senhor sobre as águas, sua voz sobre as águas imensas! Eis a voz do Senhor com poder! Eis a voz do Senhor majestosa.",
+   "Sua voz no trovão reboando! No seu templo os fiéis bradam: “Glória!” É o Senhor que domina os dilúvios, o Senhor reinará para sempre!"
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "Batismo do Senhor, Festa",
+  "referencia": "Sl 28(29),1a.2.3ac-4.3b.9b-10 (R. 11b)",
+  "refrao": "Que o Senhor abençoe, com a paz, o seu povo!",
+  "id": "2027-01-10"
+ },
+ {
+  "cor": "Verde",
+  "criadoEm": "2026-09-17T19:50:45.929040+00:00",
+  "data": "2027-01-17",
+  "estrofes": [
+   "Esperando, esperei no Senhor, e inclinando-se, ouviu meu clamor. Canto novo ele pôs em meus lábios, um poema em louvor ao Senhor.",
+   "Sacrifício e oblação não quisestes, mas abristes, Senhor, meus ouvidos; não pedistes ofertas nem vítimas, holocaustos por nossos pecados.",
+   "E então eu vos disse: “Eis que venho!” Sobre mim está escrito no livro: “Com prazer faço a vossa vontade, guardo em meu coração vossa lei!”",
+   "Boas-novas de vossa justiça anunciei numa grande assembleia; vós sabeis: não fechei os meus lábios"
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "2º Domingo do Tempo Comum",
+  "referencia": "Sl 39",
+  "refrao": "Eu disse: “Eis que venho, Senhor!” Com prazer faço a vossa vontade.",
+  "id": "2027-01-17"
+ },
+ {
+  "cor": "Roxo",
+  "criadoEm": "2026-09-17T19:24:56.043Z",
+  "data": "2027-02-20",
+  "estrofes": [
+   "Feliz o homem sem pecado em seu caminho, que na lei do Senhor Deus vai progredindo! Feliz o homem que observa seus preceitos, e de todo o coração procura a Deus!",
+   "Os vossos mandamentos vós nos destes, para serem fielmente observados. Oxalá seja bem firme a minha vida em cumprir vossa vontade e vossa lei!",
+   "Quero louvar-vos com sincero coração, pois aprendi as vossas justas decisões. Quero guardar vossa vontade e vossa lei; Senhor, não me deixeis desamparado!"
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "Sábado da 1ª Semana da Quaresma",
+  "referencia": "Sl 118",
+  "refrao": "Feliz é quem na lei do Senhor Deus vai progredindo!",
+  "id": "2027-02-20"
+ },
+ {
+  "cor": "Branco",
+  "criadoEm": "2026-09-17T19:24:56.074Z",
+  "data": "2027-04-02",
+  "estrofes": [
+   "Dai graças ao Senhor, porque ele é bom! “Eterna é a sua misericórdia!” A casa de Israel agora o diga: “Eterna é a sua misericórdia!” Os que temem o Senhor agora o digam: “Eterna é a sua misericórdia!”",
+   "“A pedra que os pedreiros rejeitaram, tornou-se agora a pedra angular. Pelo Senhor é que foi feito tudo isso: Que maravilhas ele fez a nossos olhos! Este é o dia que o Senhor fez para nós, alegremo-nos e nele exultemos!",
+   "Ó Senhor, dai-nos a vossa salvação, ó Senhor, dai-nos também prosperidade!” Bendito seja, em nome do Senhor, aquele que em seus átrios vai entrando! Desta casa do Senhor vos bendizemos. Que o Senhor e nosso Deus nos ilumine!"
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "6ª feira na Oitava da Páscoa",
+  "referencia": "Sl 117",
+  "refrao": "A pedra que os pedreiros rejeitaram, tornou-se agora a pedra angular.",
+  "id": "2027-04-02"
+ },
+ {
+  "cor": "Branco",
+  "criadoEm": "2026-09-17T19:14:41.324Z",
+  "data": "2027-04-14",
+  "estrofes": [
+   "Aclamai o Senhor Deus, ó terra inteira, cantai salmos a seu nome glorioso, dai a Deus a mais sublime louvação! Dizei a Deus: “Como são grandes vossas obras!",
+   "Toda a terra vos adore com respeito e proclame o louvor de vosso nome!” Vinde ver todas as obras do Senhor: seus prodígios estupendos entre os homens!",
+   "O mar ele mudou em terra firme, e passaram pelo rio a pé enxuto. Exultemos de alegria no Senhor! Ele domina para sempre com poder!"
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "4ª feira da 3ª Semana da Páscoa",
+  "referencia": "Sl 65",
+  "refrao": "Aclamai o Senhor Deus, ó terra inteira.",
+  "id": "2027-04-14"
+ },
+ {
+  "cor": "Branco",
+  "criadoEm": "2026-09-17T19:35:55.597056+00:00",
+  "data": "2027-04-18",
+  "estrofes": [
+   "Dai graças ao Senhor, porque ele é bom! “Eterna é a sua misericórdia!” É melhor buscar refúgio no Senhor, do que pôr no ser humano a esperança; é melhor buscar refúgio no Senhor, do que contar com os poderosos deste mundo!",
+   "Dou-vos graças, ó Senhor, porque me ouvistes e vos tornastes para mim o Salvador! A pedra que os pedreiros rejeitaram, tornou-se agora a pedra angular. Pelo Senhor é que foi feito tudo isso: que maravilhas ele fez a nossos olhos!",
+   "Bendito seja, em nome do Senhor, aquele que em seus átrios vai entrando! Vós sois meu Deus, eu vos bendigo e agradeço! Vós sois meu Deus, eu vos exalto com louvores! Dai graças ao Senhor, porque ele é bom! “Eterna é a sua misericórdia!”"
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "4º Domingo da Páscoa",
+  "referencia": "Sl 117",
+  "refrao": "A pedra que os pedreiros rejeitaram, tornou-se agora a pedra angular.",
+  "id": "2027-04-18"
+ },
+ {
+  "cor": "Branco",
+  "criadoEm": "2026-09-17T19:24:56.067Z",
+  "data": "2027-04-20",
+  "estrofes": [
+   "O Senhor ama a cidade que fundou no Monte santo; ama as portas de Sião mais que as casas de Jacó. Dizem coisas gloriosas da Cidade do Senhor.",
+   "Lembro o Egito e Babilônia entre os meus veneradores. Na Filisteia ou em Tiro ou no país da Etiópia, este ou aquele ali nasceu. De Sião, porém, se diz: “Nasceu nela todo homem; Deus é sua segurança”.",
+   "Deus anota no seu livro, onde inscreve os povos todos: “Foi ali que estes nasceram”. E por isso todos juntos a cantar se alegrarão; e, dançando, exclamarão: “Estão em ti as nossas fontes!”"
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "3ª feira da 4ª Semana da Páscoa",
+  "referencia": "Sl 86",
+  "refrao": "Cantai louvores ao Senhor, todas as gentes.",
+  "id": "2027-04-20"
+ },
+ {
+  "cor": "Branco",
+  "criadoEm": "2026-09-17T19:15:14.316Z",
+  "data": "2027-04-21",
+  "estrofes": [
+   "Que Deus nos dê a sua graça e sua bênção, e sua face resplandeça sobre nós! Que na terra se conheça o seu caminho e a sua salvação por entre os povos.",
+   "Exulte de alegria a terra inteira, pois julgais o universo com justiça; os povos governais com retidão, e guiais, em toda a terra, as nações.",
+   "Que as nações vos glorifiquem, ó Senhor, que todas as nações vos glorifiquem! Que o Senhor e nosso Deus nos abençoe, e o respeitem os confins de toda a terra!"
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "4ª feira da 4ª Semana da Páscoa",
+  "referencia": "Sl 66",
+  "refrao": "Que as nações vos glorifiquem ó Senhor, que todas as nações vos glorifiquem.",
+  "id": "2027-04-21"
+ },
+ {
+  "cor": "Branco",
+  "criadoEm": "2026-09-17T19:17:04.661Z",
+  "data": "2027-04-23",
+  "estrofes": [
+   "“Fui eu mesmo que escolhi este meu Rei e em Sião, meu monte santo, o consagrei!” O decreto do Senhor promulgarei, foi assim que me falou o Senhor Deus: “Tu és meu Filho, e eu hoje te gerei!”",
+   "Podes pedir-me, e em resposta eu te darei por tua herança os povos todos e as nações, e há de ser a terra inteira o teu domínio. Com cetro férreo haverás de dominá-los, e quebrá-los como um vaso de argila!",
+   "E agora, poderosos, entendei; soberanos, aprendei esta lição: Com temor servi a Deus, rendei-lhe glória e prestai-lhe homenagem com respeito!"
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "6ª feira da 4ª Semana da Páscoa",
+  "referencia": "Sl 2",
+  "refrao": "Tu és meu Filho, e eu hoje te gerei!",
+  "id": "2027-04-23"
+ },
+ {
+  "cor": "Branco",
+  "criadoEm": "2026-09-17T19:25:59.403Z",
+  "data": "2027-05-02",
+  "estrofes": [
+   "Cantai ao Senhor Deus um canto novo, porque ele fez prodígios! Sua mão e o seu braço forte e santo alcançaram-lhe a vitória.",
+   "O Senhor fez conhecer a salvação, e às nações, sua justiça; recordou o seu amor sempre fiel pela casa de Israel.",
+   "Os confins do universo contemplaram a salvação do nosso Deus. Aclamai o Senhor Deus, ó terra inteira, alegrai-vos e exultai"
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "6º Domingo da Páscoa",
+  "referencia": "Sl 97",
+  "refrao": "O Senhor fez conhecer a salvação e revelou sua justiça às nações.",
+  "id": "2027-05-02"
+ },
+ {
+  "cor": "Vermelho",
+  "criadoEm": "2026-09-17T19:05:27.662Z",
+  "data": "2027-05-03",
+  "estrofes": [
+   "Os céus proclamam a glória do Senhor, e o firmamento, a obra de suas mãos; o dia ao dia transmite esta mensagem, a noite à noite publica esta notícia.",
+   "Não são discursos nem frases ou palavras, nem são vozes que possam ser ouvidas; seu som ressoa e se espalha em toda a terra, chega aos confins do universo a sua voz"
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "Santos Filipe e Tiago, Apóstolos, Festa",
+  "referencia": "Sl 18",
+  "refrao": "Seu som ressoa e se espalha em toda a terra.",
+  "id": "2027-05-03"
+ },
+ {
+  "cor": "Verde",
+  "criadoEm": "2026-09-17T19:25:59.441Z",
+  "data": "2027-05-20",
+  "estrofes": [
+   "Feliz é todo aquele que não anda conforme os conselhos dos perversos; que não entra no caminho dos malvados nem junto aos zombadores vai sentar-se; mas encontra seu prazer na lei de Deus e a medita, dia e noite, sem cessar.",
+   "Eis que ele é semelhante a uma árvore que à beira da torrente está plantada; ela sempre dá seus frutos a seu tempo, † e jamais as suas folhas vão murchar. Eis que tudo o que ele faz vai prosperar.",
+   "Mas bem outra é a sorte dos perversos. † Ao contrário, são iguais à palha seca espalhada e dispersada pelo vento. Pois Deus vigia o caminho dos eleitos, mas a estrada dos malvados leva à morte."
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "5ª feira da 7ª Semana do Tempo Comum",
+  "referencia": "Sl 1",
+  "refrao": "É feliz quem a Deus se confia!",
+  "id": "2027-05-20"
+ },
+ {
+  "cor": "Branco",
+  "criadoEm": "2026-09-17T18:44:44.520Z",
+  "data": "2027-05-31",
+  "estrofes": [
+   "Eis o Deus, meu Salvador, eu confio e nada temo; o Senhor é minha força, meu louvor e salvação. Com alegria bebereis do manancial da salvação.",
+   "E direis naquele dia: “Dai louvores ao Senhor, invocai seu Santo nome, anunciai suas maravilhas, entre os povos proclamai que seu nome é o mais sublime.",
+   "Louvai cantando ao nosso Deus, que fez prodígios e portentos, publicai em toda a terra suas grandes maravilhas! Exultai cantando alegres, habitantes de Sião, porque é grande em vosso meio o Deus Santo de Israel!"
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "Visitação da Bem-aventurada Virgem Maria, Festa",
+  "referencia": "Is 12, 2-3. 4bcd. 5-6",
+  "refrao": "O Santo de Israel é grande entre vós.",
+  "id": "2027-05-31"
+ },
+ {
+  "cor": "Branco",
+  "criadoEm": "2026-09-17T18:16:29.471Z",
+  "data": "2027-12-27",
+  "estrofes": [
+   "Deus é Rei! Exulte a terra de alegria, e as ilhas numerosas rejubilem! Treva e nuvem o rodeiam no seu trono, que se apoia na justiça e no direito.",
+   "As montanhas se derretem como cera ante a face do Senhor de toda a terra; e assim proclama o céu sua justiça, todos os povos podem ver a sua glória.",
+   "Uma luz já se levanta para os justos, e a alegria, para os retos corações. Homens justos, alegrai-vos no Senhor, celebrai e bendizei seu Santo nome!"
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "São João, Apóstolo e Evangelista, Festa",
+  "referencia": "Sl 96(97)",
+  "refrao": "Ó justos, alegrai-vos no Senhor!",
+  "id": "2027-12-27"
+ },
+ {
+  "cor": "Branco",
+  "criadoEm": "2026-09-17T18:41:24.438Z",
+  "data": "2027-12-31",
+  "estrofes": [
+   "Cantai ao Senhor Deus um canto novo, cantai ao Senhor Deus, ó terra inteira! Cantai e bendizei seu santo nome! Dia após dia anunciai sua salvação.",
+   "O céu se rejubile e exulte a terra, aplauda o mar com o que vive em suas águas; os campos com seus frutos rejubilem e exultem as florestas e as matas",
+   "na presença do Senhor, pois ele vem, porque vem para julgar a terra inteira. Governará o mundo todo com justiça, e os povos julgará com lealdade."
+  ],
+  "fonte": "liturgia.up.railway.app (liturgia diária CNBB)",
+  "liturgia": "7º Dia na Oitava de Natal",
+  "referencia": "Sl 95",
+  "refrao": "O céu se rejubile e exulte a terra!",
+  "id": "2027-12-31"
  }
 ]

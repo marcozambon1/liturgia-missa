@@ -20,9 +20,10 @@ Supabase é o principal.
     config.example.js     modelo para quem for apontar para outro projeto
     schema.sql            cria as 8 tabelas, RLS e publicação Realtime
     seed.py               carga inicial: envia dados/*.json para o banco
+    exportar.py           o caminho inverso: lê o banco e regrava dados/*.json
     atualizar_liturgia.py busca salmo e aclamação da CNBB e grava no Supabase
     assets/               catedral.png (fundo em traço, usado como mask-image)
-    dados/                export do banco: songs(432), salmos(99), aclamacoes(83), missas, config
+    dados/                backup do banco: songs, missas, repertorios, salmos, aclamacoes, config
     build.py              gera dist/livro-de-cantos.html, a versão de arquivo único
     dist/                 saída do build (não versionada)
     .github/workflows/    liturgia-diaria.yml — roda o atualizar_liturgia.py todo dia 1º
@@ -321,6 +322,12 @@ não gravava (razão de existir o `#aviso-leitura`, que permanece no código).
 
 Se o site for público de verdade, o mínimo é separar leitura anônima de
 escrita autenticada — e manter `dados/` atualizado como cópia de segurança.
+Quem atualiza é `python exportar.py`, o inverso do `seed.py`: lê as seis
+coleções que valem guardar e regrava `dados/*.json` no mesmo formato que o
+`seed.py` lê de volta, ordenado por `id` para o diff ficar legível.
+`rascunhos` e `pedidos` ficam de fora de propósito — são estado transitório.
+**Conferir o diff antes de commitar**: como qualquer visitante pode gravar,
+o export traz para o repositório o que estiver no banco, inclusive estrago.
 
 ## Herança do ambiente do Artifact
 
