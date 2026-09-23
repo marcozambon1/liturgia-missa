@@ -92,6 +92,50 @@ button{font-family:inherit;}
 :root[data-theme="dark"] .catedral{opacity:.2;}
 @media print{ .catedral{display:none !important;} }
 
+/* ---------- login ----------
+   O <body> nasce com .bloqueado escrito no HTML: se o auth.js não rodar, o
+   site fica escondido em vez de aparecer destrancado. Falha fechando. */
+body.bloqueado .topbar,
+body.bloqueado main,
+body.bloqueado .catedral{display:none;}
+
+.login-overlay{
+  position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center;
+  background:var(--paper); padding:24px 16px; overflow-y:auto;
+}
+.login-overlay[hidden]{display:none;}
+.login-card{
+  width:100%; max-width:380px; background:var(--card); border:1px solid var(--linha);
+  border-radius:var(--radius); box-shadow:var(--shadow); padding:26px 22px;
+}
+.login-brand{display:flex; flex-direction:column; gap:2px; margin-bottom:18px;}
+.login-brand .mark{font-family:var(--font-display); font-weight:700; font-size:1.4rem; color:var(--verde-2);}
+.login-brand .sub{font-size:.78rem; color:var(--ink-dim); font-style:italic; font-family:var(--font-display);}
+.login-intro{font-size:.84rem; color:var(--ink-dim); line-height:1.5; margin:0 0 14px;}
+.login-acao{width:100%; justify-content:center; margin-top:4px;}
+.login-erro{
+  font-size:.82rem; line-height:1.45; color:var(--danger); background:var(--paper-2);
+  border:1px solid var(--danger); border-radius:8px; padding:9px 11px; margin-bottom:12px;
+}
+.login-erro[hidden]{display:none;}
+.login-alt{margin:16px 0 0; text-align:center;}
+.login-alt a{font-size:.82rem; color:var(--verde-2); font-weight:600;}
+.login-alt a[hidden]{display:none;}
+
+/* quem está logado, no cabeçalho */
+.sessao{margin-left:auto; display:inline-flex; align-items:center; gap:8px;}
+.sessao-quem{font-size:.74rem; color:var(--ink-dim); max-width:22ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+@media (max-width:560px){ .sessao-quem{display:none;} }
+
+/* ---------- usuários (só administrador) ---------- */
+.convite-linha{display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;}
+.pessoa-row{
+  display:flex; align-items:center; gap:10px; padding:10px 12px;
+  border:1px solid var(--linha); border-radius:8px; background:var(--card); margin-bottom:8px;
+}
+.pessoa-row .quem{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.88rem;}
+.pessoa-row .quem .eu{color:var(--ink-dim); font-style:italic;}
+
 /* ---------- header ---------- */
 .topbar{
   position:sticky; top:env(safe-area-inset-top,0px); z-index:30;
@@ -121,7 +165,8 @@ main{max-width:920px; margin:0 auto; padding-block:18px 48px; min-height:60vh;}
 .muted{color:var(--ink-dim);}
 .small{font-size:.8rem;}
 .hint{font-size:.8rem; color:var(--ink-dim); line-height:1.5;}
-input[type="text"], input[type="url"], input[type="date"], select, textarea{
+input[type="text"], input[type="url"], input[type="date"],
+input[type="email"], input[type="password"], select, textarea{
   font-family:var(--font-body); font-size:.92rem; color:var(--ink);
   background:var(--card); border:1px solid var(--linha); border-radius:8px;
   padding:9px 11px; width:100%;

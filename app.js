@@ -3141,6 +3141,145 @@ el("pedidos-list").addEventListener("click", function(e){
 });
 
 /* ---------------- TABS ---------------- */
+/* ---------------- USUÁRIOS (só administrador) ----------------
+   Esta aba fala direto com o window.supabaseClient, e não com o `db` do
+   adapter, de propósito: `perfis` e `convites` não têm a forma
+   `id text` + `data jsonb` das outras oito tabelas — precisam de colunas
+   reais, com chave estrangeira para auth.users, porque é em cima delas que as
+   políticas de RLS decidem quem entra. O adapter não enxerga esse formato.
+
+   Quem esconde/revela a aba é aoEntrar(), pelo `admin` do perfil. Isso é
+   conforto de interface, não permissão: quem mexer no HTML e revelar a aba na
+   marra continua esbarrando nas políticas do banco, que só deixam um
+   administrador ler convites ou promover alguém. */
+function renderUsuarios(){
+  var cli = window.supabaseClient;
+  var listaConvites = document.getElementById("convites-list");
+  var listaPessoas = document.getElementById("usuarios-list");
+  if(!cli){
+    listaConvites.innerHTML = '<div class="empty">Banco indisponível.</div>';
+    listaPessoas.innerHTML = '<div class="empty">Banco indisponível.</div>';
+    return;
+  }
+  listaConvites.innerHTML = '<div class="loading">Carregando convites…</div>';
+  listaPessoas.innerHTML = '<div class="loading">Carregando pessoas…</div>';
+
+  cli.from("convites").select("email,admin,criado_em").is("usado_em", null).order("criado_em")
+    .then(function(res){
+      if(res.error){
+        listaConvites.innerHTML = '<div class="empty">Não foi possível ler os convites.</div>';
+        return;
+      }
+      var itens = res.data || [];
+      if(!itens.length){
+        listaConvites.innerHTML = '<div class="empty">Nenhum convite esperando.</div>';
+        return;
+      }
+      listaConvites.innerHTML = itens.map(function(c){
+        return '<div class="pessoa-row" data-email="'+esc(c.email)+'">' +
+          '<span class="quem">'+esc(c.email)+'</span>' +
+          (c.admin ? '<span class="chip">admin</span>' : "") +
+          '<button class="btn btn-danger btn-sm js-cancelar-convite">Cancelar</button>' +
+        '</div>';
+      }).join("");
+    });
+
+  cli.from("perfis").select("id,email,admin,criado_em").order("criado_em")
+    .then(function(res){
+      if(res.error){
+        listaPessoas.innerHTML = '<div class="empty">Não foi possível ler a lista de pessoas.</div>';
+        return;
+      }
+      var eu = window.authUsuario ? window.authUsuario.id : null;
+      listaPessoas.innerHTML = (res.data || []).map(function(p){
+        var souEu = p.id === eu;
+        return '<div class="pessoa-row" data-id="'+esc(p.id)+'">' +
+          '<span class="quem">'+esc(p.email)+(souEu? ' <span class="eu">(você)</span>':"")+'</span>' +
+          (p.admin ? '<span class="chip">admin</span>' : "") +
+          // Ninguém tira o próprio acesso: o banco também recusa (a política
+          // tem `id <> auth.uid()`), mas esconder o botão evita o susto.
+          (souEu ? "" : '<button class="btn btn-sm js-alternar-admin">'+(p.admin? "Tirar admin":"Tornar admin")+'</button>' +
+                        '<button class="btn btn-danger btn-sm js-revogar">Revogar acesso</button>') +
+        '</div>';
+      }).join("") || '<div class="empty">Ninguém com acesso ainda.</div>';
+    });
+}
+
+document.getElementById("convite-btn").addEventListener("click", function(){
+  var cli = window.supabaseClient;
+  var campo = document.getElementById("convite-email");
+  var email = (campo.value || "").trim().toLowerCase();
+  var admin = document.getElementById("convite-admin").checked;
+  if(!email || email.indexOf("@") === -1){ toast("Informe um e-mail válido."); return; }
+  if(!cli){ toast("Banco indisponível."); return; }
+  // upsert: reconvidar alguém cujo convite foi usado reabre o convite, que é
+  // o caminho de "perdi a senha" enquanto não existe recuperação por e-mail.
+  cli.from("convites").upsert({
+    email: email, admin: admin,
+    convidado_por: window.authUsuario ? window.authUsuario.id : null,
+    usado_em: null
+  }, { onConflict: "email" }).then(function(res){
+    if(res.error){ toast("Não foi possível convidar. Você é administrador?"); return; }
+    campo.value = "";
+    document.getElementById("convite-admin").checked = false;
+    toast("Convite criado. Avise a pessoa para usar “Primeiro acesso”.");
+    renderUsuarios();
+  }).catch(function(){ toast("Não foi possível convidar agora."); });
+});
+
+document.getElementById("convites-list").addEventListener("click", function(e){
+  var btn = e.target.closest(".js-cancelar-convite");
+  if(!btn) return;
+  var email = btn.closest(".pessoa-row").getAttribute("data-email");
+  armarOuAgir(btn, "Confirmar?", function(){
+    window.supabaseClient.from("convites").delete().eq("email", email).then(function(res){
+      if(res.error){ toast("Não foi possível cancelar o convite."); return; }
+      toast("Convite cancelado.");
+      renderUsuarios();
+    }).catch(function(){ toast("Não foi possível cancelar o convite."); });
+  });
+});
+
+document.getElementById("usuarios-list").addEventListener("click", function(e){
+  var linha = e.target.closest(".pessoa-row");
+  if(!linha) return;
+  var id = linha.getAttribute("data-id");
+
+  var revogar = e.target.closest(".js-revogar");
+  if(revogar){
+    /* Apagar o perfil é o que revoga: a conta continua existindo no
+       auth.users (apagar de lá exigiria a chave service_role, que não pode
+       chegar ao navegador), mas sem perfil as políticas recusam tudo e o
+       auth.js derruba a sessão no próximo carregamento. */
+    armarOuAgir(revogar, "Confirmar?", function(){
+      window.supabaseClient.from("perfis").delete().eq("id", id).then(function(res){
+        if(res.error){ toast("Não foi possível revogar o acesso."); return; }
+        toast("Acesso revogado.");
+        renderUsuarios();
+      }).catch(function(){ toast("Não foi possível revogar o acesso."); });
+    });
+    return;
+  }
+
+  var alternar = e.target.closest(".js-alternar-admin");
+  if(alternar){
+    var virarAdmin = alternar.textContent.indexOf("Tornar") === 0;
+    window.supabaseClient.from("perfis").update({ admin: virarAdmin }).eq("id", id).then(function(res){
+      if(res.error){ toast("Não foi possível mudar o perfil."); return; }
+      toast(virarAdmin ? "Agora é administrador." : "Não é mais administrador.");
+      renderUsuarios();
+    }).catch(function(){ toast("Não foi possível mudar o perfil."); });
+  }
+});
+
+/* Chamado pelo auth.js assim que o perfil da pessoa é carregado. */
+window.aoEntrar = function(perfil){
+  var aba = document.getElementById("tab-usuarios");
+  if(aba) aba.hidden = !(perfil && perfil.admin);
+};
+/* O auth.js precisa disto para não deixar alguém sair perdendo missa não salva. */
+window.guardarPendencia = guardarPendencia;
+
 function irParaAba(tab){
   /* Sair de "Montar Missa"/"Repertório" com alteração pendente pergunta antes
      (salvar / sair sem salvar / cancelar). */
@@ -3158,6 +3297,7 @@ function irParaAba(tab){
   if(tab==="repertorio") renderRepertorioPanel();
   if(tab==="imprimir"){ renderPrintSelect(); renderPrintPanel(); }
   if(tab==="adicionar") renderAdicionar();
+  if(tab==="usuarios") renderUsuarios();
 }
 document.getElementById("tabs").addEventListener("click", function(e){
   var b = e.target.closest(".tab-btn");

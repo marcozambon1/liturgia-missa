@@ -116,6 +116,25 @@ def exportar_tabela(url, key, tabela, arquivo_json):
 
     itens = [documento(linha) for linha in linhas]
     caminho = os.path.join(DADOS_DIR, arquivo_json)
+
+    # Desde que o banco passou a exigir login (schema.sql, seção 5), ler sem
+    # permissão NÃO dá erro: o RLS simplesmente devolve zero linhas. Sem esta
+    # guarda, rodar o export com a anonKey apagaria o backup inteiro e o commit
+    # pareceria normal. Se a tabela veio vazia e o arquivo anterior tinha
+    # conteúdo, isso é permissão faltando, não tabela esvaziada.
+    if not itens and os.path.exists(caminho):
+        try:
+            with open(caminho, encoding="utf-8") as f:
+                anterior = json.load(f)
+        except Exception:
+            anterior = []
+        if anterior:
+            print(f" [!] 0 registros, mas dados/{arquivo_json} tem {len(anterior)}.")
+            print("     Backup anterior mantido. Quase sempre é a chave sem permissão de")
+            print("     leitura: use a service_role (Settings > API no Supabase) ou exporte")
+            print("     logado. Se a tabela foi esvaziada mesmo, apague o arquivo e rode de novo.")
+            return False
+
     # Só grava depois de ler tudo: um erro no meio não pode deixar o backup
     # anterior pela metade.
     with open(caminho, "w", encoding="utf-8", newline="\n") as f:

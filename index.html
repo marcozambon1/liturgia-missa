@@ -12,20 +12,79 @@
      URL, o navegador continua rodando o app.js antigo junto com o index novo
      (combinação que já fez o botão Salvar não responder e o PDF não baixar).
      BUMPAR ESTA DATA A CADA PUBLICAÇÃO. -->
-<link rel="stylesheet" href="styles.css?v=20260922c">
+<link rel="stylesheet" href="styles.css?v=20260923">
 </head>
-<body>
+<!-- A classe "bloqueado" nasce aqui no HTML de propósito: se o auth.js não
+     rodar (erro de JS, rede caindo no meio), o site fica escondido em vez de
+     aparecer destrancado. Quem a remove é o auth.js, depois do login. -->
+<body class="bloqueado">
 <div class="catedral" aria-hidden="true"></div>
+
+<!-- Tela de login. Ela não é a segurança — quem recusa o acesso é o banco,
+     pelas políticas de RLS (schema.sql, seção 5). Ver CLAUDE.md. -->
+<div class="login-overlay" id="login-overlay" hidden>
+  <div class="login-card">
+    <div class="login-brand">
+      <span class="mark">Livro de Cantos</span>
+      <span class="sub">Grupo Marco e Luan</span>
+    </div>
+
+    <form id="login-form">
+      <p class="login-intro">Entre com seu e-mail e senha para abrir o livro.</p>
+      <div class="login-erro" id="login-erro" hidden></div>
+      <div class="field">
+        <label for="login-email">E-mail</label>
+        <input type="email" id="login-email" autocomplete="username" spellcheck="false">
+      </div>
+      <div class="field">
+        <label for="login-senha">Senha</label>
+        <input type="password" id="login-senha" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary login-acao" type="submit" id="login-entrar">Entrar</button>
+    </form>
+
+    <form id="primeiro-form" hidden>
+      <p class="login-intro">Primeira vez aqui? Informe o e-mail que o administrador convidou e escolha a sua senha.</p>
+      <div class="login-erro" id="primeiro-erro" hidden></div>
+      <div class="field">
+        <label for="primeiro-email">E-mail convidado</label>
+        <input type="email" id="primeiro-email" autocomplete="username" spellcheck="false">
+      </div>
+      <div class="field">
+        <label for="primeiro-senha">Escolha uma senha</label>
+        <input type="password" id="primeiro-senha" autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label for="primeiro-repetir">Repita a senha</label>
+        <input type="password" id="primeiro-repetir" autocomplete="new-password">
+      </div>
+      <button class="btn btn-primary login-acao" type="submit" id="primeiro-criar">Criar minha senha</button>
+    </form>
+
+    <p class="login-alt">
+      <a href="#" id="login-ir-primeiro">Primeiro acesso — escolher minha senha</a>
+      <a href="#" id="login-ir-entrar" hidden>Já tenho senha — entrar</a>
+    </p>
+  </div>
+</div>
 
 <div class="topbar">
   <div class="topbar-inner">
-    <div class="brand"><span class="mark">Livro de Cantos</span><span class="sub">Grupo Marco e Luan</span></div>
+    <div class="brand">
+      <span class="mark">Livro de Cantos</span><span class="sub">Grupo Marco e Luan</span>
+      <span class="sessao">
+        <span class="sessao-quem" id="sessao-email"></span>
+        <button class="btn btn-ghost btn-sm" id="sessao-sair" hidden>Sair</button>
+      </span>
+    </div>
     <nav class="tabs" id="tabs">
       <button class="tab-btn active" data-tab="biblioteca">Biblioteca</button>
       <button class="tab-btn" data-tab="missa">Montar Missa</button>
       <button class="tab-btn" data-tab="repertorio">Repertório</button>
       <button class="tab-btn" data-tab="imprimir">Imprimir</button>
       <button class="tab-btn" data-tab="adicionar">Adicionar Música</button>
+      <!-- só aparece para administrador; quem revela é aoEntrar() no app.js -->
+      <button class="tab-btn" data-tab="usuarios" id="tab-usuarios" hidden>Usuários</button>
     </nav>
   </div>
 </div>
@@ -174,6 +233,31 @@ Aqui vai a letra, e o acorde fica em cima da sílaba"></textarea>
     </div>
   </section>
 
+  <section class="panel" id="panel-usuarios">
+    <div class="card add-card">
+      <h3 class="sec-titulo">Convidar alguém</h3>
+      <p class="hint" style="margin:0 0 10px;">
+        O convite é que libera o acesso. Depois de convidar, avise a pessoa: ela entra
+        no site, clica em <strong>Primeiro acesso</strong>, informa este mesmo e-mail e
+        escolhe a senha dela. Ninguém — nem você — chega a ver a senha de ninguém.
+      </p>
+      <div class="convite-linha">
+        <div class="field" style="flex:1 1 240px; margin:0;">
+          <label for="convite-email">E-mail</label>
+          <input type="email" id="convite-email" placeholder="pessoa@email.com" autocomplete="off" spellcheck="false">
+        </div>
+        <label class="toggle-line"><input type="checkbox" id="convite-admin"> Administrador</label>
+        <button class="btn btn-primary" id="convite-btn">Convidar</button>
+      </div>
+    </div>
+
+    <h3 class="sec-titulo">Convites esperando primeiro acesso</h3>
+    <div id="convites-list"></div>
+
+    <h3 class="sec-titulo">Quem tem acesso hoje</h3>
+    <div id="usuarios-list"></div>
+  </section>
+
 </main>
 
 <div class="overlay" id="song-overlay">
@@ -275,8 +359,11 @@ Aqui vai a letra, e o acorde fica em cima da sílaba"></textarea>
 <div class="toast" id="toast"></div>
 <!-- Supabase SDK e Adaptador -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js?v=20260922c"></script>
-<script src="supabase-adapter.js?v=20260922c"></script>
-<script src="app.js?v=20260922c"></script>
+<script src="config.js?v=20260923"></script>
+<!-- auth.js antes do adapter: é ele quem define window.authGate, que o
+     adapter procura para não entregar o banco ao app antes do login. -->
+<script src="auth.js?v=20260923"></script>
+<script src="supabase-adapter.js?v=20260923"></script>
+<script src="app.js?v=20260923"></script>
 </body>
 </html>

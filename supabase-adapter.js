@@ -44,12 +44,21 @@
       var client = window.supabase.createClient(url, key);
       window.supabaseClient = client;
       var dbWrapper = createDbWrapper(client);
+      var modal = document.getElementById("supabase-config-modal");
+      if (modal) modal.remove();
+
+      // Com login ligado, quem entrega o banco ao app é o auth.js, e só
+      // depois de a pessoa entrar — senão o app dispara oito onSnapshot que
+      // o RLS vai recusar, e a tela enche de erro antes da tela de login.
+      if (typeof window.authGate === "function") {
+        window.authGate(client, dbWrapper);
+        return;
+      }
+
       window.supabaseDb = dbWrapper;
       if (typeof window.reiniciarBoot === "function") {
         window.reiniciarBoot(dbWrapper);
       }
-      var modal = document.getElementById("supabase-config-modal");
-      if (modal) modal.remove();
     } catch(err) {
       console.error("Erro ao inicializar Supabase:", err);
       window.supabaseDb = null;
@@ -382,6 +391,12 @@
     });
 
     Promise.all(carregamentos).then(function() {
+      // O modo demonstração não passa pelo login: ele não fala com o banco do
+      // grupo, só lê os dados/*.json que já são arquivos públicos do site. Por
+      // isso destranca a tela na mão — o auth.js nunca entra em cena aqui.
+      document.body.classList.remove("bloqueado");
+      var overlayLogin = document.getElementById("login-overlay");
+      if (overlayLogin) overlayLogin.hidden = true;
       window.supabaseDb = offlineDb;
       if (typeof window.reiniciarBoot === "function") {
         window.reiniciarBoot(offlineDb);

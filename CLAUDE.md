@@ -12,13 +12,14 @@ Supabase é o principal.
 
 ## Estrutura
 
-    index.html            marcação (5 abas: Biblioteca, Montar Missa, Repertório, Imprimir, Adicionar Música)
+    index.html            marcação (tela de login + 6 abas: Biblioteca, Montar Missa, Repertório, Imprimir, Adicionar Música, Usuários)
     styles.css            todo o visual, tema claro/escuro por variáveis CSS
-    app.js                toda a lógica — ~2.900 linhas de JavaScript puro
+    app.js                toda a lógica — ~3.000 linhas de JavaScript puro
+    auth.js               tela de login e primeiro acesso; segura o app até a pessoa entrar
     supabase-adapter.js   traduz a interface do Firestore que o app.js fala para o Supabase
     config.js             credenciais do Supabase (versionado, ver "Credenciais")
     config.example.js     modelo para quem for apontar para outro projeto
-    schema.sql            cria as 8 tabelas, RLS e publicação Realtime
+    schema.sql            cria as 10 tabelas, RLS (com login obrigatório) e publicação Realtime
     seed.py               carga inicial: envia dados/*.json para o banco
     exportar.py           o caminho inverso: lê o banco e regrava dados/*.json
     atualizar_liturgia.py busca salmo e aclamação da CNBB e grava no Supabase
@@ -312,16 +313,90 @@ usar `doc(id).set()` com id explícito. O `memoria` inicial também não tem
 `repertorios` (a coleção é criada sob demanda) e `dados/repertorios.json` não
 entra na carga.
 
-## Segurança do banco
+**14. Ler sem permissão não dá erro — devolve zero linhas.** É como o RLS
+funciona, e é uma armadilha específica do `exportar.py`: rodar o export com uma
+chave sem permissão de leitura sobrescreveria `dados/*.json` com arrays vazios
+e o commit pareceria normal, destruindo a única cópia de segurança. Por isso
+`exportar_tabela()` recusa gravar arquivo vazio por cima de um que tinha
+conteúdo. Na escrita o sintoma é outro e mais óbvio (401/403), tratado com
+mensagem própria em `atualizar_liturgia.py`. Nos dois casos a causa costuma ser
+a mesma: chave `anon` onde era para estar a `service_role`.
 
-O `schema.sql` cria, em todas as tabelas, política `for all using (true)
-with check (true)`. Com a `anonKey` pública no `config.js`, isso significa
-que **qualquer visitante do site pode escrever e apagar tudo**, inclusive
-os 432 cantos. É o inverso do que valia no Artifact, onde visitante lia e
-não gravava (razão de existir o `#aviso-leitura`, que permanece no código).
+**15. O `<body>` nasce com `class="bloqueado"` escrito no HTML.** Não é o JS
+que tranca o site — é o HTML, e o `auth.js` é quem **destranca** depois do
+login. A ordem importa: se o `auth.js` não rodar (erro de JS, rede caindo no
+meio), o site fica escondido em vez de aparecer destrancado. Falha fechando.
+Quem mexer no `index.html` não pode tirar essa classe "para facilitar o teste".
+Os scripts também têm ordem obrigatória: **`auth.js` vem antes do
+`supabase-adapter.js`**, porque é ele que define `window.authGate`, que o
+adapter procura para não entregar o banco ao app antes do login — sem isso o
+app dispara oito `onSnapshot` que o RLS recusa, e a tela enche de erro antes
+mesmo da tela de login aparecer.
 
-Se o site for público de verdade, o mínimo é separar leitura anônima de
-escrita autenticada — e manter `dados/` atualizado como cópia de segurança.
+**16. O Realtime não herda o token sozinho.** O socket do Realtime é separado
+das chamadas REST; sem `client.realtime.setAuth(session.access_token)` (feito
+no `aoAutenticar()` do `auth.js`), as políticas recusam a inscrição e a tela
+para de atualizar sozinha — sintoma fácil de confundir com bug de interface,
+igual ao da armadilha nº 8.
+
+## Segurança do banco — o site só abre com login
+
+Até setembro/2026 o `schema.sql` dava `for all using (true) with check
+(true)` em tudo. Com a `anonKey` pública no `config.js`, **qualquer pessoa
+com o link do repositório lia e apagava os 435 cantos com um `curl`, sem
+nunca abrir o site**. Hoje a seção 5 do `schema.sql` troca isso por políticas
+`to authenticated using (public.tem_acesso())`.
+
+**A tela de login não é a segurança; ela é a porta.** Quem recusa o acesso é
+o banco. Isso não é detalhe de implementação, é o ponto: um login feito só em
+JavaScript não protegeria nada, porque dá para pular pelo DevTools ou ignorar
+o site e falar direto com o PostgREST. Qualquer mexida aqui tem que preservar
+essa ordem — se a regra estiver só no `auth.js`, ela não existe.
+
+**Duas tabelas novas, com forma diferente das outras oito:**
+
+- **`perfis`** — `id uuid` (referencia `auth.users`), `email`, `admin`,
+  `criado_em`. Ter conta não basta: é o perfil que dá acesso. Apagar a linha
+  revoga na hora, mesmo com a conta viva — é assim que um administrador tira
+  alguém **sem precisar da chave `service_role`**, que nunca pode chegar ao
+  navegador (ela ignora todo o RLS).
+- **`convites`** — `email` (chave), `admin`, `convidado_por`, `criado_em`,
+  `usado_em`. É o convite que libera o cadastro.
+
+Elas **não** seguem o formato `id text` + `data jsonb` das outras — precisam
+de colunas reais e chave estrangeira para `auth.users`, porque é em cima
+delas que as políticas decidem. **O adapter não as enxerga**: a aba Usuários
+fala direto com `window.supabaseClient`, não com o `db`. É a única parte do
+app que faz isso, e de propósito.
+
+**O caminho de um usuário novo** (nenhuma chave secreta passa pelo navegador):
+
+1. um administrador cadastra o e-mail na aba **Usuários**;
+2. a pessoa abre o site, clica em **Primeiro acesso**, informa o mesmo e-mail
+   e **escolhe a senha**;
+3. o gatilho `ao_criar_usuario()` em `auth.users` procura um convite aberto.
+   Sem convite, ele **levanta exceção e o cadastro inteiro é desfeito** —
+   é isso que impede alguém de se cadastrar sozinho. Com convite, cria o
+   `perfis` herdando o `admin` e marca o convite como usado.
+
+**O primeiro administrador nasce igual a todo mundo**: a seção 5.6 do
+`schema.sql` insere o convite (com um e-mail de exemplo que **precisa ser
+trocado antes de rodar**), e a conta é criada pelo "Primeiro acesso". Não
+existe senha padrão em lugar nenhum.
+
+**`tem_acesso()` e `eh_admin()` são `SECURITY DEFINER` de propósito**: elas
+leem `perfis` por fora do RLS. Sem isso, uma política de `perfis` que consulta
+`perfis` entra em recursão infinita.
+
+**Os scripts em Python não têm login.** `atualizar_liturgia.py` (a Action
+mensal) e `exportar.py` rodam sem gente na frente, então o secret
+`SUPABASE_KEY` **tem que ser a chave `service_role`**, que passa por cima do
+RLS — com a `anon`, a Action para de gravar a liturgia. Ver a armadilha nº 14.
+
+Continua valendo: **manter `dados/` atualizado** (`python exportar.py`) como
+cópia de segurança. E vale lembrar que `dados/*.json` são arquivos públicos
+do site num repositório público — trancar o site protege o banco contra
+estrago, **não esconde as cifras de ninguém**.
 Quem atualiza é `python exportar.py`, o inverso do `seed.py`: lê as seis
 coleções que valem guardar e regrava `dados/*.json` no mesmo formato que o
 `seed.py` lê de volta, ordenado por `id` para o diff ficar legível.

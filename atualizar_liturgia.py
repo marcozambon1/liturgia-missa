@@ -54,6 +54,21 @@ def enviar_doc(url, key, tabela, doc_id, data):
     try:
         with urllib.request.urlopen(req) as resp:
             return resp.status in (200, 201)
+    except urllib.error.HTTPError as e:
+        # Desde que o banco passou a exigir login (schema.sql, seção 5), a
+        # anonKey não escreve mais nada: as políticas só aceitam usuário
+        # autenticado com perfil. Este script roda sem gente na frente, então
+        # o secret SUPABASE_KEY da Action tem que ser a chave *service_role*,
+        # que passa por cima do RLS. Com a anon, o PostgREST devolve 401/403
+        # ou um 201 que não gravou linha nenhuma.
+        if e.code in (401, 403):
+            print(f"Erro ao salvar {tabela}/{doc_id}: {e.code} — sem permissão de escrita.")
+            print("    O banco exige login desde a seção 5 do schema.sql.")
+            print("    Use a chave service_role no secret SUPABASE_KEY (Settings > API no Supabase).")
+        else:
+            corpo = e.read().decode("utf-8", errors="ignore")
+            print(f"Erro ao salvar {tabela}/{doc_id}: HTTP {e.code} {corpo}")
+        return False
     except Exception as e:
         print(f"Erro ao salvar {tabela}/{doc_id}: {e}")
         return False
