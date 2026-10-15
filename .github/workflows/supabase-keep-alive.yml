@@ -1,0 +1,46 @@
+name: Supabase Keep Alive
+
+on:
+  schedule:
+    # Executa a cada 3 dias às 06:00 UTC (03:00 BRT)
+    - cron: '0 6 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    name: Ping Supabase Database
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validar Configuração dos Secrets
+        run: |
+          if [ -z "${{ secrets.SUPABASE_URL }}" ] || [ -z "${{ secrets.SUPABASE_KEY }}" ]; then
+            echo "::error::Os secrets SUPABASE_URL ou SUPABASE_KEY não foram encontrados no repositório. Configure-os em Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
+      - name: Realizar Ping na API do Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          # Remove barra final caso exista
+          BASE_URL="${SUPABASE_URL%/}"
+
+          echo "Disparando consulta de keep-alive no banco de dados..."
+          HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" \
+            -X GET "$BASE_URL/rest/v1/songs?select=id&limit=1" \
+            -H "apikey: $SUPABASE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_KEY" \
+            -H "Range: 0-0")
+
+          echo "HTTP Status Code: $HTTP_STATUS"
+          echo "Resposta:"
+          cat response.json
+          echo ""
+
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+            echo "Sucesso: O banco de dados do Supabase foi consultado e permanece ativo!"
+          else
+            echo "::error::Falha ao contatar Supabase (HTTP $HTTP_STATUS). Verifique a URL e a chave fornecida."
+            exit 1
+          fi
